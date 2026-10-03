@@ -219,8 +219,8 @@
      ===================================================================== */
   let query = '';
   const tile = (t) => `<span class="tile" style="--gc:${C.groups[t.group].color}">${t.tile}</span>`;
-  const row = (t, hl) => `<a class="row" href="#/${t.id}">${tile(t)}<span class="row-t"><b>${t.title}</b><span>${hl || t.sub}</span></span>${I.chev}</a>`;
-  const qcard = (t) => `<a class="qcard" href="#/${t.id}">${tile(t)}<b>${t.title}</b></a>`;
+  const row = (t, hl) => `<a class="row" href="${C.toolHref(t)}">${tile(t)}<span class="row-t"><b>${t.title}</b><span>${hl || t.sub}</span></span>${I.chev}</a>`;
+  const qcard = (t) => `<a class="qcard" href="${C.toolHref(t)}">${tile(t)}<b>${t.title}</b></a>`;
 
   function searchMatches(q) {
     const words = C.norm(q).split(/\s+/).filter(Boolean);
@@ -259,14 +259,14 @@
         </div>
       </div>
       ${Vault.isTemp() ? '<div class="temp-note">Modo temporário — nada é salvo. Ao bloquear ou fechar, os dados somem.</div>' : ''}
-      <a class="pt-card" href="#/pacientes">
+      <a class="pt-card" href="${a ? '#/paciente?id=' + a.id : '#/leitos'}">
         <span class="pt-ico">${I.user}</span>
-        <span class="pt-t">${a ? `<b>${esc(Patients.name(a))}</b>` : '<b>Sem paciente selecionado</b>'}<small class="num">${esc(sum || (a ? 'sem dados ainda' : 'toque para escolher ou cadastrar'))}</small></span>
-        <span class="pt-act">${a ? 'Trocar' : 'Pacientes'}</span>
+        <span class="pt-t">${a ? `<b>${esc(Patients.name(a))}</b>` : '<b>Sem paciente selecionado</b>'}<small class="num">${esc(sum || (a ? 'sem dados ainda' : 'cálculos avulsos · toque para escolher um leito'))}</small></span>
+        <span class="pt-act">${a ? 'Abrir' : 'Leitos'}</span>
       </a>
       <div id="installWrap" class="install" hidden><button class="btn block" id="installBtn">${I.download} Instalar no celular</button></div>
       <div id="homeBody"></div>
-      <p class="foot"><a href="#/seguranca">Segurança e senha</a><br><br>Ferramenta de apoio à decisão. Não substitui o julgamento clínico nem os protocolos da instituição.<br>Funciona sem internet depois de aberta uma vez.</p>
+      <p class="foot"><a href="#/seguranca">Ajustes e segurança</a><br><br>Ferramenta de apoio à decisão. Não substitui o julgamento clínico nem os protocolos da instituição.<br>Funciona sem internet depois de aberta uma vez.</p>
     `);
     renderHomeBody();
     const q = $('#q');
@@ -298,127 +298,51 @@
     let html = '';
     if (f.length) html += `<div class="home-section"><div class="h-label">Fixadas</div><div class="quick">${f.map(qcard).join('')}</div></div>`;
     if (r.length) html += `<div class="home-section"><div class="h-label">Recentes</div><div class="quick">${r.map(qcard).join('')}</div></div>`;
+    /* categorias em acordeão: só uma aberta por vez, para não despejar 25 itens de uma vez */
+    const open = store.get('homeGroup', null);
+    html += '<div class="home-section"><div class="h-label">Todas as calculadoras</div><div class="gacc">';
     C.groupOrder.forEach((g) => {
       const ts = C.tools.filter((t) => t.group === g);
-      if (ts.length) html += `<div class="home-section"><div class="h-label">${C.groups[g].name}</div><div class="list">${ts.map((t) => row(t)).join('')}</div></div>`;
+      if (!ts.length) return;
+      html += `<details class="gacc-i" data-g="${g}" ${open === g ? 'open' : ''}>
+        <summary style="--gc:${C.groups[g].color}"><i class="gdot"></i><b>${C.groups[g].name}</b><span class="gcount">${ts.length}</span>${I.down}</summary>
+        <div class="list">${ts.map((t) => row(t)).join('')}</div></details>`;
     });
+    html += '</div></div>';
     body.innerHTML = html;
-  }
-
-  /* =====================================================================
-     PACIENTES
-     ===================================================================== */
-  function renderPatients() {
-    document.title = 'Pacientes — Plantão';
-    const { q } = hashParts();
-    const volta = q.get('volta');
-    const backTo = volta && C.tool(volta) ? '#/' + volta : '#/';
-    const tipoName = C.uid('tp');
-    const pg = mount(`
-      <header class="bar" id="bar">
-        <a class="icon-btn" href="${backTo}" aria-label="Voltar">${I.back}</a>
-        <div class="bar-title"><span class="k">Lista do plantão</span><h1>Pacientes</h1></div>
-      </header>
-      <main class="tool">
-        ${Vault.isTemp() ? '<div class="note warn" style="margin:0 0 12px">Modo temporário: a lista some ao bloquear ou fechar o app.</div>' : ''}
-        <section class="card">
-          <div class="card-h"><h2>Novo paciente</h2></div>
-          ${C.seg({ name: tipoName, label: 'Identificar por', cls: 'cols', value: store.get('ptTipo', 'leito'), options: [['ini', 'Iniciais'], ['leito', 'Leito'], ['atd', 'Atendimento']] })}
-          <form id="ptForm" novalidate style="margin-top:12px">
-            <label class="fld" for="ptLabel"><span class="fld-l" id="ptLabelL">Leito</span>
-              <span class="fld-box"><input id="ptLabel" type="text" maxlength="24" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="ex.: 12"></span>
-              <span class="fld-h" id="ptHint"></span>
-            </label>
-            <div class="lock-msg" id="ptMsg" role="alert"></div>
-            <button type="submit" class="btn primary block" style="margin-top:4px">${I.plus} Adicionar e selecionar</button>
-          </form>
-        </section>
-        <div id="ptList"></div>
-        <p class="ref">Use só o necessário para identificar o paciente no plantão (iniciais, leito ou atendimento). Os dados ficam criptografados neste aparelho. Remova os pacientes na alta ou na passagem do plantão.</p>
-      </main>`);
-    const lbl = $('#ptLabel');
-    const syncTipo = () => {
-      const t = C.radioVal(pg, tipoName);
-      store.set('ptTipo', t);
-      $('#ptLabelL').textContent = { ini: 'Iniciais', leito: 'Leito', atd: 'Nº do atendimento' }[t];
-      lbl.placeholder = { ini: 'ex.: J.S.M.', leito: 'ex.: 12 ou UTI2-05', atd: 'ex.: 4587123' }[t];
-      lbl.setAttribute('inputmode', t === 'atd' ? 'numeric' : 'text');
-      lbl.setAttribute('autocapitalize', t === 'ini' ? 'characters' : 'off');
-      $('#ptHint').textContent = t === 'ini' ? 'Evite nome completo.' : '';
-    };
-    syncTipo();
-    pg.addEventListener('change', (e) => { if (e.target.name === tipoName) { syncTipo(); lbl.focus(); } });
-
-    const go = () => { location.hash = backTo; };
-    $('#ptForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const tipo = C.radioVal(pg, tipoName), label = lbl.value.trim();
-      const m = $('#ptMsg');
-      if (!label) { m.textContent = 'Preencha a identificação.'; m.className = 'lock-msg err'; return; }
-      const dup = Patients.find(tipo, label);
-      if (dup) { Patients.setActive(dup.id); C.toast(`${Patients.name(dup)} já estava na lista — selecionado`); return go(); }
-      const p = Patients.add(tipo, label);
-      C.toast(`${Patients.name(p)} selecionado`);
-      go();
-    });
-
-    function drawList() {
-      const list = Patients.list().slice().sort((a, b) => b.updated - a.updated);
-      const act = Patients.active();
-      const avulso = C.store.get('patient', null);
-      const item = (p) => `
-        <div class="pt-row ${act && act.id === p.id ? 'on' : ''}">
-          <button type="button" class="pt-pick" data-pick="${p.id}">
-            <span class="pt-radio"></span>
-            <span class="row-t"><b>${esc(Patients.name(p))}</b><span>${esc(C.Patient.summary(p.data || {}) || 'sem dados')} · ${ago(p.updated)}</span></span>
-          </button>
-          <button type="button" class="pt-del" data-del="${p.id}" aria-label="Remover ${esc(Patients.name(p))}">Remover</button>
-        </div>`;
-      $('#ptList').innerHTML = `
-        <div class="home-section" style="padding:0"><div class="h-label">${list.length} paciente${list.length === 1 ? '' : 's'} na lista</div>
-        <div class="list">
-          ${list.map(item).join('')}
-          <div class="pt-row ${!act ? 'on' : ''}">
-            <button type="button" class="pt-pick" data-pick="">
-              <span class="pt-radio"></span>
-              <span class="row-t"><b>Avulso (sem identificação)</b><span>${avulso && avulso.v && Object.keys(avulso.v).length ? esc(C.Patient.summary(avulso.v)) + ' · apaga em 12 h' : 'para cálculos rápidos; apaga em 12 h'}</span></span>
-            </button>
-            ${avulso ? '<button type="button" class="pt-del" data-del="__avulso">Limpar</button>' : ''}
-          </div>
-        </div></div>`;
-    }
-    drawList();
-    $('#ptList').addEventListener('click', (e) => {
-      const pick = e.target.closest('[data-pick]');
-      if (pick) { Patients.setActive(pick.dataset.pick || null); return go(); }
-      const del = e.target.closest('[data-del]');
-      if (!del) return;
-      if (!del.dataset.armed) {
-        $$('[data-armed]', pg).forEach((b) => { delete b.dataset.armed; b.textContent = b.dataset.del === '__avulso' ? 'Limpar' : 'Remover'; });
-        del.dataset.armed = '1'; del.textContent = 'Confirmar'; del.classList.add('armed');
-        return;
-      }
-      if (del.dataset.del === '__avulso') { C.Patient.clear(); C.toast('Dados avulsos apagados'); }
-      else { const p = Patients.get(del.dataset.del); Patients.remove(del.dataset.del); C.toast(`${Patients.name(p)} removido`); }
-      drawList();
-    });
+    body.querySelectorAll('.gacc-i').forEach((d) => d.addEventListener('toggle', () => {
+      if (d.open) {
+        body.querySelectorAll('.gacc-i[open]').forEach((o) => { if (o !== d) o.open = false; });
+        store.set('homeGroup', d.dataset.g);
+      } else if (store.get('homeGroup', null) === d.dataset.g) store.set('homeGroup', null);
+    }));
   }
 
   /* =====================================================================
      SEGURANÇA
      ===================================================================== */
   async function renderSecurity() {
-    document.title = 'Segurança — Plantão';
+    document.title = 'Ajustes — Plantão';
     const temp = Vault.isTemp();
     const bioOk = !temp && await Vault.bioAvailable();
     const hasBio = Vault.hasBio();
-    const alName = C.uid('al');
+    const alName = C.uid('al'), luName = C.uid('lu');
+    const gc = C.gasCfg();
     const pg = mount(`
       <header class="bar" id="bar">
         <a class="icon-btn" href="#/" aria-label="Voltar">${I.back}</a>
-        <div class="bar-title"><span class="k">Cofre local</span><h1>Segurança e senha</h1></div>
+        <div class="bar-title"><span class="k">Preferências e cofre local</span><h1>Ajustes e segurança</h1></div>
       </header>
       <main class="tool">
+        <section class="card">
+          <div class="card-h"><h2>Gasometria</h2><span class="aux">vale para a gasometria e os leitos</span></div>
+          ${C.seg({ name: luName, label: 'Unidade do lactato', cls: 'cols', value: gc.lacUnit, options: [['mmol', 'mmol/L'], ['mgdl', 'mg/dL']] })}
+          <div class="grid" style="margin-top:12px">
+            ${C.field({ id: 'gcPatm', label: 'Pressão barométrica', unit: 'mmHg', value: gc.patm, lim: [400, 800], hint: 'Para o gradiente A-a. Nível do mar 760.' })}
+            ${C.field({ id: 'gcAlt', label: 'ou altitude da cidade', unit: 'm', ph: 'ex.: 1170', lim: [0, 5000], hint: 'Calcula a pressão.' })}
+            ${C.field({ id: 'gcAg', label: 'Ânion gap de referência', unit: 'mEq/L', value: gc.agRef, lim: [4, 20], hint: 'AG alto acima de referência + 4.' })}
+          </div>
+        </section>
         <section class="card">
           <div class="card-h"><h2>Como os dados são protegidos</h2></div>
           <p style="margin:0;font-size:14.5px;color:var(--ink-2)">Pacientes, valores digitados, diluições e preferências ficam cifrados com <b>AES-256-GCM</b>. A chave vem da sua senha (PBKDF2-SHA256, 600 mil iterações) e só existe na memória enquanto o app está aberto. Nada é enviado para servidores. ${temp ? '<br><br><b>Você está no modo temporário:</b> nada está sendo salvo.' : ''}</p>
@@ -457,6 +381,19 @@
         </section>
       </main>`);
     bindEyes(pg);
+    const saveGc = (k, v) => { store.set('gasCfg', { ...C.gasCfg(), [k]: v }); };
+    pg.addEventListener('change', (e) => { if (e.target.name === luName) { saveGc('lacUnit', e.target.value); C.toast('Lactato em ' + (e.target.value === 'mgdl' ? 'mg/dL' : 'mmol/L')); } });
+    pg.addEventListener('input', (e) => {
+      C.validate(e.target);
+      const n = C.read(e.target);
+      if (!Number.isFinite(n)) return;
+      if (e.target.id === 'gcPatm') saveGc('patm', n);
+      if (e.target.id === 'gcAg') saveGc('agRef', n);
+      if (e.target.id === 'gcAlt') {
+        const p = Math.round(760 * Math.pow(1 - 2.25577e-5 * n, 5.25588));
+        $('#gcPatm').value = p; saveGc('patm', p);
+      }
+    });
     $('#lockNow').addEventListener('click', () => lockNow('Bloqueado'));
     const wipe = $('#wipe');
     wipe.addEventListener('click', () => {
@@ -551,16 +488,42 @@
     });
   }
 
+  /* ---------- barra inferior: três destinos, sempre os mesmos ---------- */
+  const nav = document.createElement('nav');
+  nav.className = 'bnav';
+  nav.setAttribute('aria-label', 'Navegação principal');
+  document.body.appendChild(nav);
+  C.navHidden = (on) => document.body.classList.toggle('nav-off', !!on);
+  function renderNav(where) {
+    if (!where) { nav.hidden = true; document.body.classList.remove('has-nav'); return; }
+    nav.hidden = false;
+    document.body.classList.add('has-nav');
+    const a = Patients.active();
+    nav.innerHTML = `
+      <a href="#/" class="${where === 'calc' ? 'on' : ''}">${I.grid}<span>Calculadoras</span></a>
+      <a href="#/gaso?novo=1" class="bn-main" aria-label="Nova gasometria ${a ? 'para ' + esc(Patients.name(a)) : 'avulsa'}">${I.plus}<span>Gaso</span></a>
+      <a href="#/leitos" class="${where === 'leitos' ? 'on' : ''}">${I.beds}<span>Leitos</span></a>`;
+  }
+
   /* ---------- rotas ---------- */
   function route() {
-    if (!Vault.supported()) return renderUnsupported();
-    if (!Vault.isOpen()) return renderLock();
-    const { id } = hashParts();
-    if (id === 'pacientes') renderPatients();
+    C.navHidden(false);
+    if (!Vault.supported()) { renderNav(null); return renderUnsupported(); }
+    if (!Vault.isOpen()) { renderNav(null); return renderLock(); }
+    const { id, q } = hashParts();
+    let where = 'calc';
+    if (id === 'pacientes') { where = 'leitos'; C.routes.leitos(q); }        /* compatibilidade: lista antiga → Leitos */
     else if (id === 'seguranca') renderSecurity();
-    else { const t = id && C.tool(id); if (t) renderTool(t); else renderHome(); }
+    else if (C.routes[id]) { where = C.routes[id].nav || 'leitos'; C.routes[id](q); }
+    else {
+      const t = id && C.tool(id);
+      if (t && t.href) { pushRecent(t.id); location.replace(t.href); return; }
+      if (t) renderTool(t); else renderHome();
+    }
+    renderNav(where);
     window.scrollTo(0, 0);
   }
+  C.route = route;
   window.addEventListener('hashchange', route);
   window.addEventListener('scroll', () => {
     const bar = $('#bar');

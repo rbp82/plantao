@@ -228,7 +228,7 @@
 
   /* ================= oxigenação ================= */
   C.register({
-    id: 'oxigenacao', group: 'inf', tile: 'DO₂',
+    id: 'oxigenacao', group: 'resp', tile: 'DO₂',
     title: 'Oxigenação e transporte de O₂',
     sub: 'P/F, extração de O₂, SvO₂, DO₂, VO₂',
     keywords: ['pao2/fio2', 'p/f', 'relacao pf', 'horowitz', 'sdra', 'svo2', 'scvo2', 'teo2', 'extracao', 'do2', 'vo2', 'oferta de oxigenio', 'debito cardiaco'],

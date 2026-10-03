@@ -325,6 +325,11 @@
     plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
     finger: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7.5 5.5A7 7 0 0 1 19 11v1.5"/><path d="M5 9a7 7 0 0 0-.5 2.6c0 2 .4 3.9 1.2 5.6"/><path d="M9 18.8a12 12 0 0 1-1.5-6.3 4.5 4.5 0 0 1 9 0v1"/><path d="M12 12.5c0 3 .7 5.7 2 7.8"/><path d="M16.4 16.3c-.1 1.3-.2 2.5-.6 3.7"/></svg>',
     download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+    grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><path d="M16.75 13.5v6.5M13.5 16.75H20"/></svg>',
+    beds: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V6M3 14h18v4M21 14v-2.5a3 3 0 0 0-3-3h-7v5.5"/><circle cx="7" cy="10.5" r="2"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
+    alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M12 4 21 19H3z"/><path d="M12 10v4M12 16.5v.5"/></svg>',
+    down: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
   };
   C.icon = I;
 
@@ -442,7 +447,14 @@
       if (store.get('activePatient', null) === id) this.setActive(null);
     },
     /* rótulo curto: "Leito 12", "J.S.", "Atend. 123456" */
-    name(p) { return !p ? 'Avulso' : p.tipo === 'ini' ? p.label.toUpperCase() : p.tipo === 'leito' ? 'Leito ' + p.label : 'Atend. ' + p.label; },
+    name(p) {
+      if (!p) return 'Avulso';
+      const base = p.tipo === 'ini' ? p.label.toUpperCase() : p.tipo === 'leito' ? 'Leito ' + p.label : 'Atend. ' + p.label;
+      const ini = p.tipo !== 'ini' && p.ficha && p.ficha.ini ? ' · ' + p.ficha.ini.toUpperCase() : '';
+      return base + ini;
+    },
+    /* grava alterações feitas no objeto do paciente (ficha, registros) */
+    touch(p) { if (p) p.updated = Date.now(); this.save(this.list()); },
   };
   C.Patients = Patients;
 
@@ -720,14 +732,31 @@
 
   /* ---------- registro ---------- */
   C.groups = {
-    hemo: { name: 'Hemodinâmica', color: 'var(--g-hemo)' },
+    hemo: { name: 'Hemodinâmica e perfusão', color: 'var(--g-hemo)' },
+    resp: { name: 'Ventilação e oxigenação', color: 'var(--g-resp)' },
     sed: { name: 'Sedação, analgesia e arritmia', color: 'var(--g-sed)' },
     inf: { name: 'Sepse e infecção', color: 'var(--g-inf)' },
     met: { name: 'Metabólico e ácido-base', color: 'var(--g-met)' },
     hema: { name: 'Hemostasia', color: 'var(--g-hema)' },
   };
-  C.groupOrder = ['hemo', 'inf', 'sed', 'met', 'hema'];
-  /* tool: {id, group, tile, title, sub, keywords, weight(bool), render(root, api)} */
+  C.groupOrder = ['met', 'hemo', 'resp', 'inf', 'sed', 'hema'];
+  /* tool: {id, group, tile, title, sub, keywords, weight(bool), render(root, api)}
+     ou {…, href: '#/rota'} para ferramentas que são telas próprias (ex.: gasometria com leitos) */
   C.register = (tool) => C.tools.push(tool);
   C.tool = (id) => C.tools.find((t) => t.id === id);
+  C.toolHref = (t) => t.href || '#/' + t.id;
+
+  /* telas além das ferramentas (leitos, paciente, ficha, gasometria): id → render(query) */
+  C.routes = {};
+  /* monta uma tela num elemento novo, para que os ouvintes de eventos morram com ela */
+  C.mount = function (html) {
+    const d = document.createElement('div');
+    d.innerHTML = html;
+    document.getElementById('app').replaceChildren(d);
+    return d;
+  };
+
+  /* identificação do paciente na lista: leito e iniciais podem coexistir (ficha) */
+  C.ptBed = (p) => (!p ? '' : p.tipo === 'leito' ? p.label : (p.ficha && p.ficha.leito) || '');
+  C.ptIni = (p) => (!p ? '' : (p.tipo === 'ini' ? p.label : (p.ficha && p.ficha.ini) || '').toUpperCase());
 })();

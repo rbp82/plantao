@@ -1,17 +1,20 @@
 /* Service worker — app offline-first. Ao alterar qualquer arquivo, incremente VERSION. */
-const VERSION = 'plantao-v3';
+const VERSION = 'plantao-v4';
 const SHELL = [
   './',
   'index.html',
   'manifest.webmanifest',
   'app.css',
   'core.js',
+  'engine.js',
+  'beds.js',
   'app.js',
   'hemo.js',
   'inf.js',
   'sed.js',
   'met.js',
   'hema.js',
+  'delta.js',
   'icon.svg',
   'icon-192.png',
   'icon-512.png',

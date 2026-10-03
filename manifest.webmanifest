@@ -1,7 +1,7 @@
 {
   "name": "Plantão — calculadoras clínicas",
   "short_name": "Plantão",
-  "description": "Calculadoras de UTI e emergência: vasoativas, sedação, sepse, ajuste renal, gasometria, CAD, sódio e TEG.",
+  "description": "Calculadoras de UTI e emergência e acompanhamento por leito: gasometria completa com tendência, hemodinâmica, fluido-responsividade, ventilação, vasoativas, sedação, sepse, ajuste renal, CAD, sódio e TEG.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",
@@ -17,9 +17,9 @@
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
   "shortcuts": [
+    { "name": "Nova gasometria", "url": "./#/gaso?novo=1", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Leitos", "url": "./#/leitos", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
     { "name": "Drogas vasoativas", "url": "./#/dva", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "Ajuste renal de ATB", "url": "./#/atb", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "Sedação contínua", "url": "./#/sedacao", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "Gasometria", "url": "./#/gasometria", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+    { "name": "Ajuste renal de ATB", "url": "./#/atb", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ]
 }
