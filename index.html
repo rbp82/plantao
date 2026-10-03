@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plantão — calculadoras</title>
+<meta name="description" content="Calculadoras clínicas para plantão de UTI e emergência: drogas vasoativas, sedação, sepse, ajuste renal de antimicrobianos, gasometria, CAD, sódio e TEG.">
+<meta name="theme-color" content="#F3F2EE">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Plantão">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app.css">
+<script>
+  /* aplica o tema antes de pintar, evitando flash */
+  try { var t = JSON.parse(localStorage.getItem('plantao:theme')); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<div id="app"></div>
+<noscript><p style="padding:24px">Ative o JavaScript para usar as calculadoras.</p></noscript>
+<script src="core.js"></script>
+<script src="hemo.js"></script>
+<script src="inf.js"></script>
+<script src="sed.js"></script>
+<script src="met.js"></script>
+<script src="hema.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
