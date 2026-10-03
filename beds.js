@@ -278,6 +278,11 @@
         ${hist.length ? `<section class="card"><div class="card-h"><h2>Registros</h2><span class="aux">${hist.length}</span></div><div class="hist">
           ${histShown.map((s) => `<a class="hi sev-${s.res.worst || 'none'}" href="#/gaso?p=${p.id}&r=${s.r.id}"><time>${dt(s.r.ts)}</time><span>${esc((s.res.main || s.res.dx[0] || { t: 'sem achados' }).t)}</span>${I.chev}</a>`).join('')}</div>
           ${hist.length > 3 ? `<button type="button" class="link" data-act="hiAll">${more.hiAll ? 'mostrar menos' : `ver todos (${hist.length})`}</button>` : ''}</section>` : ''}
+        ${(() => {
+          const ids = p.pcrs || [];
+          const list = (store.get('pcrHist', []) || []).filter((c) => ids.includes(c.id)).reverse();
+          return list.length ? `<section class="card"><div class="card-h"><h2>Paradas (PCR)</h2><span class="aux">${list.length}</span></div><div class="hist">${list.map((c) => `<a class="hi sev-${c.outcome === 'rce' ? 'ok' : 'crit'}" href="#/pcr-relatorio?id=${c.id}"><time>${dt(c.start)}</time><span>${{ rce: 'RCE', obito: 'Óbito', inter: 'Interrompida' }[c.outcome] || ''} · ${Math.round((c.end - c.start) / 60000)} min</span>${I.chev}</a>`).join('')}</div></section>` : '';
+        })()}
         <div class="pt-foot">
           ${p.archived ? '' : '<button type="button" class="btn" data-act="arch">Alta / arquivar</button>'}
           <button type="button" class="btn danger" data-act="del">Excluir paciente</button>
@@ -659,7 +664,7 @@
     $('#kp', S.pg).innerHTML = `
       <div class="kp-h">
         <button type="button" data-k="prev" class="kp-n" aria-label="Campo anterior">${I.back}</button>
-        <div class="kp-i"><b>${lab ? lab[0] : f.l}</b><span>${n ? `ref ${numTxt(n[0])}–${numTxt(n[1])} ` : ''}${unitOf(fid) || (lab ? lab[1] : '')}</span></div>
+        <div class="kp-i"><b>${lab ? lab[0] : f.l}</b><span>${n ? `ref ${numTxt(n[0])} a ${numTxt(n[1])} ` : ''}${unitOf(fid) || (lab ? lab[1] : '')}</span></div>
         <div class="kp-v${fresh && raw ? ' fresh' : ''}">${raw ? esc(raw.replace('.', ',').replace('-', '−')) : '<span class="ph">—</span>'}<i class="caret"></i></div>
         <button type="button" data-k="close" class="kp-n ok" aria-label="Concluir">${I.check}</button>
       </div>

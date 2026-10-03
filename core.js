@@ -329,6 +329,7 @@
     beds: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V6M3 14h18v4M21 14v-2.5a3 3 0 0 0-3-3h-7v5.5"/><circle cx="7" cy="10.5" r="2"/></svg>',
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
     alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M12 4 21 19H3z"/><path d="M12 10v4M12 16.5v.5"/></svg>',
+    heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/><path d="M3.5 12.5h4l1.5-3 3 6 1.5-3h7"/></svg>',
     down: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
   };
   C.icon = I;
@@ -732,6 +733,7 @@
 
   /* ---------- registro ---------- */
   C.groups = {
+    emerg: { name: 'Emergência', color: 'var(--crit)' },
     hemo: { name: 'Hemodinâmica e perfusão', color: 'var(--g-hemo)' },
     resp: { name: 'Ventilação e oxigenação', color: 'var(--g-resp)' },
     sed: { name: 'Sedação, analgesia e arritmia', color: 'var(--g-sed)' },
@@ -739,7 +741,9 @@
     met: { name: 'Metabólico e ácido-base', color: 'var(--g-met)' },
     hema: { name: 'Hemostasia', color: 'var(--g-hema)' },
   };
-  C.groupOrder = ['met', 'hemo', 'resp', 'inf', 'sed', 'hema'];
+  C.groupOrder = ['emerg', 'met', 'hemo', 'resp', 'inf', 'sed', 'hema'];
+  /* true enquanto há algo que não pode ser interrompido pelo bloqueio automático (ex.: PCR em andamento) */
+  C.isBusy = () => false;
   /* tool: {id, group, tile, title, sub, keywords, weight(bool), render(root, api)}
      ou {…, href: '#/rota'} para ferramentas que são telas próprias (ex.: gasometria com leitos) */
   C.register = (tool) => C.tools.push(tool);

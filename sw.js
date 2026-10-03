@@ -1,5 +1,5 @@
 /* Service worker — app offline-first. Ao alterar qualquer arquivo, incremente VERSION. */
-const VERSION = 'plantao-v4';
+const VERSION = 'plantao-v5';
 const SHELL = [
   './',
   'index.html',
@@ -8,6 +8,7 @@ const SHELL = [
   'core.js',
   'engine.js',
   'beds.js',
+  'pcr.js',
   'app.js',
   'hemo.js',
   'inf.js',

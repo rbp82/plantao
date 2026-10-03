@@ -205,6 +205,7 @@
     if (msg) C.toast(msg);
   }
   function checkIdle() {
+    if (C.isBusy()) { lastActive = Date.now(); return; } /* PCR em andamento: nunca bloquear */
     if (Vault.isOpen() && Date.now() - lastActive > autolockMin() * 60000) lockNow('Bloqueado por inatividade');
   }
   setInterval(checkIdle, 15000);
@@ -259,6 +260,9 @@
         </div>
       </div>
       ${Vault.isTemp() ? '<div class="temp-note">Modo temporário — nada é salvo. Ao bloquear ou fechar, os dados somem.</div>' : ''}
+      ${store.get('pcrAtiva', null)
+        ? `<a class="pcr-cta live" href="#/pcr">${I.heart}<span><b>PCR em andamento</b><small>toque para voltar ao cronômetro</small></span>${I.chev}</a>`
+        : `<a class="pcr-cta" href="#/pcr">${I.heart}<span><b>PCR — ACLS guiado</b><small>cronômetro, algoritmo e relatório</small></span>${I.chev}</a>`}
       <a class="pt-card" href="${a ? '#/paciente?id=' + a.id : '#/leitos'}">
         <span class="pt-ico">${I.user}</span>
         <span class="pt-t">${a ? `<b>${esc(Patients.name(a))}</b>` : '<b>Sem paciente selecionado</b>'}<small class="num">${esc(sum || (a ? 'sem dados ainda' : 'cálculos avulsos · toque para escolher um leito'))}</small></span>
@@ -303,7 +307,7 @@
     html += '<div class="home-section"><div class="h-label">Todas as calculadoras</div><div class="gacc">';
     C.groupOrder.forEach((g) => {
       const ts = C.tools.filter((t) => t.group === g);
-      if (!ts.length) return;
+      if (!ts.length || g === 'emerg') return; /* PCR já tem o botão vermelho no topo; a busca continua achando */
       html += `<details class="gacc-i" data-g="${g}" ${open === g ? 'open' : ''}>
         <summary style="--gc:${C.groups[g].color}"><i class="gdot"></i><b>${C.groups[g].name}</b><span class="gcount">${ts.length}</span>${I.down}</summary>
         <div class="list">${ts.map((t) => row(t)).join('')}</div></details>`;

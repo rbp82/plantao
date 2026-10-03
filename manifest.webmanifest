@@ -17,6 +17,7 @@
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
   "shortcuts": [
+    { "name": "PCR — ACLS guiado", "url": "./#/pcr", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
     { "name": "Nova gasometria", "url": "./#/gaso?novo=1", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
     { "name": "Leitos", "url": "./#/leitos", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
     { "name": "Drogas vasoativas", "url": "./#/dva", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
