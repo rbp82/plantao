@@ -816,6 +816,7 @@ body.kp-open .gx-mon .m b { font-size: 18px; }
 .sc-more { display: flex; gap: 8px; margin-top: 10px; }
 .sc-more .btn { flex: 1; gap: 6px; }
 .sc-raw { margin-top: 14px; font-size: 13px; color: var(--ink-3); }
+.sc-raw img { display: block; max-width: 100%; max-height: 60vh; margin: 8px auto 0; border-radius: 6px; border: 1px solid var(--line-2); }
 .sc-raw pre { white-space: pre-wrap; font-family: var(--f-mono); font-size: 11px; line-height: 1.45; background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; }
 
 .gx-find .steps li { font-size: 14.5px; }

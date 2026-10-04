@@ -508,7 +508,8 @@
     $$('#scanCamIn, #scanPickIn', pg).forEach((inp) => inp.addEventListener('change', () => {
       const f = inp.files && inp.files[0];
       inp.value = '';
-      if (f) { S.scan = { file: f, rot: 0 }; scanRun(); }
+      if (f) { S.scan = { file: f, rot: 0, want: S.scanWant || null }; scanRun(); }
+      S.scanWant = null;
     }));
     live(true);
   };
@@ -785,6 +786,7 @@
           return live(false);
         }
         case 'bool': setV(t.dataset.f, getV(t.dataset.f) !== true); refreshRo(t.dataset.f); return live(false);
+        case 'scanNext': S.scanWant = t.dataset.s; closeSheet(pg); $(t.dataset.src === 'pick' ? '#scanPickIn' : '#scanCamIn', pg).click(); return;
         case 'scanCam': case 'scanAgain': closeKp(); $('#scanCamIn', pg).click(); return;
         case 'scanPick': closeKp(); $('#scanPickIn', pg).click(); return;
         case 'scanRot': S.scan.rot = (S.scan.rot + 90) % 360; return scanRun();
@@ -843,13 +845,20 @@
   }
 
   /* ---------- leitura por foto (scan.js): OCR no aparelho → conferência → lança nos campos ---------- */
-  /* amostra venosa: as pressões e a saturação vão para a gasometria venosa central; o resto vem desmarcado */
+  /* amostra venosa: PCO2, PO2 e saturação vão para a gasometria venosa central.
+     Eletrólitos, glicose, lactato e Hb valem para as duas amostras: entram se o campo ainda estiver vazio.
+     pH, HCO3 e BE venosos não têm campo próprio e não substituem os arteriais: vêm desmarcados. */
   const VEN = { paco2: 'pvco2', pao2: 'pvo2', sao2: 'svo2' };
+  const ART_ONLY = ['ph', 'hco3', 'be', 'fio2'];
   const scanTarget = (fid) => (S.scan.smp === 'ven' ? VEN[fid] || fid : fid);
-  const SCAN_MSG = { 'loading tesseract core': 'Carregando o leitor', 'initializing tesseract': 'Carregando o leitor', 'loading language traineddata': 'Carregando o leitor', 'initializing api': 'Preparando', 'recognizing text': 'Lendo o ticket', 'second pass': 'Tentando de novo com a foto original', zoom: 'Relendo os resultados ampliados' };
+  const venFilled = () => ['pvco2', 'svo2', 'pvo2'].some((f) => H(getV(f)));
+  const artFilled = () => ['ph', 'paco2', 'pao2'].some((f) => H(getV(f)));
+  const SCAN_MSG = { scan: 'Tratando a foto: recorte, luz e nitidez', 'loading tesseract core': 'Carregando o leitor', 'initializing tesseract': 'Carregando o leitor', 'loading language traineddata': 'Carregando o leitor', 'initializing api': 'Preparando', 'recognizing text': 'Lendo o ticket', 'second pass': 'Tentando de novo com a foto original', zoom: 'Relendo os resultados ampliados' };
   function scanDefaults() {
     S.scan.on = {};
-    S.scan.res.items.forEach((it) => { S.scan.on[it.fid] = it.sure && (S.scan.smp !== 'ven' || !!VEN[it.fid]); });
+    S.scan.res.items.forEach((it) => {
+      S.scan.on[it.fid] = it.sure && (S.scan.smp !== 'ven' || !!VEN[it.fid] || (!ART_ONLY.includes(it.fid) && !H(getV(it.fid))));
+    });
   }
   function scanRun() {
     const pg = S.pg, tok = (S.scan.tok = {});
@@ -865,7 +874,7 @@
     C.scan.read(S.scan.file, { rot: S.scan.rot, onProgress }).then((res) => {
       if (S.scan.tok !== tok || !$('[data-scan]', pg)) return; /* fechou a folha ou saiu da tela */
       S.scan.res = res;
-      S.scan.smp = res.sample === 'ven' ? 'ven' : 'art';
+      S.scan.smp = res.sample || S.scan.want || 'art'; /* o "Tipo de amostra" impresso vale mais que o botão escolhido */
       scanDefaults();
       scanSheet();
     }).catch((err) => {
@@ -884,7 +893,7 @@
         <span class="box">${I.check}</span>
         <span class="sc-t"><b>${F[tf].l}</b>${img ? `<img alt="trecho da foto" src="${img}">` : `<small>lido: ${esc(it.raw)} ${esc(it.unit)}</small>`}</span>
         <span class="sc-v"><b>${numTxt(toDisp(tf, it.v))}</b><small>${unitOf(tf)}</small>${H(cur) ? `<small class="cur">atual ${numTxt(toDisp(tf, +cur))}</small>` : ''}</span>
-        ${it.note ? `<span class="sc-n">${esc(it.note)}</span>` : ''}</button>`;
+        ${it.note || (sc.smp === 'ven' && ART_ONLY.includes(it.fid)) ? `<span class="sc-n">${esc([sc.smp === 'ven' && ART_ONLY.includes(it.fid) ? 'amostra venosa: não substitui o valor arterial' : '', it.note].filter(Boolean).join(' · '))}</span>` : ''}</button>`;
     }).join('');
     const body = res.items.length
       ? `<p class="fld-h">Compare cada valor com o recorte da foto. Só os marcados serão lançados.</p>
@@ -892,9 +901,9 @@
         <div class="sc-list">${rows}</div>
         <button type="button" class="btn primary block" data-act="scanApply"${n ? '' : ' disabled'}>${n ? `Lançar ${n} valor${n > 1 ? 'es' : ''}` : 'Nada marcado'}</button>`
       : `<p class="fld-h">Não encontrei valores de gasometria nesta foto. Ticket plano, sem reflexo, texto na horizontal e ocupando a tela ajudam; o modo "digitalizar documento" da câmera do celular dá o melhor resultado.</p>`;
-    sheet(pg, `<div data-scan><h2>Conferir leitura</h2>${body}
+    sheet(pg, `<div data-scan><h2>Conferir leitura${res.items.length ? (sc.smp === 'ven' ? ' · venosa' : ' · arterial') : ''}</h2>${body}
       <div class="sc-more"><button type="button" class="btn sm" data-act="scanAgain">${I.camera}Outra foto</button><button type="button" class="btn sm" data-act="scanRot">${I.rotate}Girar e reler</button></div>
-      ${res.text ? `<details class="sc-raw"><summary>Texto lido</summary><pre>${esc(res.text)}</pre></details>` : ''}</div>`);
+      <details class="sc-raw"><summary>Foto tratada e texto lido</summary>${res.preview ? `<img alt="foto após o tratamento" src="${res.preview}">` : ''}${res.text ? `<pre>${esc(res.text)}</pre>` : ''}</details></div>`);
     const sh = $('.sh', pg);
     if (sh && top) { sh.style.animation = 'none'; sh.scrollTop = top; }
   }
@@ -904,13 +913,20 @@
     chosen.forEach((it) => setV(scanTarget(it.fid), it.v));
     rec.via = 'foto';
     if (p) P.touch(p);
-    S.openG = chosen.some((it) => scanTarget(it.fid) !== it.fid) ? 'ven' : 'gaso';
+    const smp = sc.smp;
+    S.openG = smp === 'ven' ? 'ven' : 'gaso';
     S.scan = null;
     closeSheet(S.pg);
     S.tab = 'in';
     live(true);
     window.scrollTo(0, 0);
-    C.toast(`${chosen.length} valor${chosen.length > 1 ? 'es lançados' : ' lançado'} da foto`);
+    const msg = `${chosen.length} valor${chosen.length > 1 ? 'es lançados' : ' lançado'} da ${smp === 'ven' ? 'venosa' : 'arterial'}`;
+    /* gaso arterial + venosa central costumam vir juntas: oferece a outra, se ainda estiver vazia */
+    const other = smp === 'ven' ? (artFilled() ? null : 'art') : (venFilled() ? null : 'ven');
+    if (!other) return C.toast(msg);
+    sheet(S.pg, `<div data-scan><h2>${msg}</h2><p class="fld-h">Tem também o ticket da ${other === 'ven' ? 'gasometria venosa central' : 'gasometria arterial'}?</p><div style="height:12px"></div>
+      <button type="button" class="btn primary block" data-act="scanNext" data-s="${other}" data-src="cam">${I.camera}Fotografar a ${other === 'ven' ? 'venosa' : 'arterial'}</button><div style="height:8px"></div>
+      <div class="sc-more"><button type="button" class="btn sm" data-act="scanNext" data-s="${other}" data-src="pick">${I.image}Da galeria</button><button type="button" class="btn sm" data-sx>Agora não</button></div></div>`);
   }
 
   /* entrada na lista de calculadoras: a gasometria é a tela completa acima */
