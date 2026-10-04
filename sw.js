@@ -1,5 +1,5 @@
 /* Service worker — app offline-first. Ao alterar qualquer arquivo, incremente VERSION. */
-const VERSION = 'plantao-v5';
+const VERSION = 'plantao-v6';
 const SHELL = [
   './',
   'index.html',
@@ -8,6 +8,7 @@ const SHELL = [
   'core.js',
   'engine.js',
   'beds.js',
+  'scan.js',
   'pcr.js',
   'app.js',
   'hemo.js',
@@ -23,6 +24,9 @@ const SHELL = [
   'apple-touch-icon.png',
 ];
 const FONTS = 'plantao-fonts';
+/* leitor de foto (Tesseract, ≈ 7 MB): baixado só no primeiro uso e mantido entre versões do app */
+const OCR = 'plantao-ocr-7.0.0';
+const isOcr = (p) => /(?:^|\/)(?:tesseract[\w.-]*\.js|worker\.min\.js|eng\.traineddata\.gz)$/.test(p);
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -31,7 +35,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== FONTS).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== FONTS && k !== OCR).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -54,6 +58,17 @@ self.addEventListener('fetch', (e) => {
   }
 
   if (url.origin !== location.origin) return;
+
+  if (isOcr(url.pathname)) {
+    e.respondWith(caches.open(OCR).then(async (c) => {
+      const hit = await c.match(req, { ignoreSearch: true });
+      if (hit) return hit;
+      const r = await fetch(req);
+      if (r.ok) c.put(req, r.clone());
+      return r;
+    }));
+    return;
+  }
 
   /* navegação: sempre devolve o shell (rotas são por hash) */
   if (req.mode === 'navigate') {

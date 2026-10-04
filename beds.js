@@ -500,9 +500,16 @@
         <div class="gx-tabs" id="gxTabs" role="tablist"></div>
       </div>
       <main class="tool gx" id="gxPane"></main>
-      <div class="kp" id="kp" hidden></div>`);
+      <div class="kp" id="kp" hidden></div>
+      <input type="file" accept="image/*" capture="environment" id="scanCamIn" hidden>
+      <input type="file" accept="image/*" id="scanPickIn" hidden>`);
     S.pg = pg;
     pg.addEventListener('click', onGasClick);
+    $$('#scanCamIn, #scanPickIn', pg).forEach((inp) => inp.addEventListener('change', () => {
+      const f = inp.files && inp.files[0];
+      inp.value = '';
+      if (f) { S.scan = { file: f, rot: 0 }; scanRun(); }
+    }));
     live(true);
   };
   C.routes.gaso.nav = 'gaso';
@@ -531,7 +538,8 @@
   function inHtml() {
     const r = merged(S.ctx.p, S.ctx.rec);
     const og = openGroup();
-    return G.GROUPS.map((g) => {
+    const scan = C.scan ? `<div class="gx-scan"><button type="button" class="btn" data-act="scanCam">${I.camera}Ler ticket do gasômetro</button><button type="button" class="btn" data-act="scanPick" aria-label="Escolher foto ou scan da galeria">${I.image}Galeria</button></div>` : '';
+    return scan + G.GROUPS.map((g) => {
       const [n, t] = filled(g);
       const open = og === g.id;
       return `<section class="gx-g${open ? ' open' : ''}" style="--c:${CHC[g.ch]}" data-g="${g.id}">
@@ -539,6 +547,7 @@
         ${open ? `<div class="gx-ros">${groupFields(g).map((f) => roHtml(f, r)).join('')}</div>${g.id === 'fluid' && r.ftest ? fluidHint(r) : ''}${g.id === 'pac' ? '<p class="fld-h gx-h">Compartilhado com as outras calculadoras e com a ficha.</p>' : ''}` : ''}
       </section>`;
     }).join('') + (S.ctx.p ? '<button type="button" class="link danger gx-del" data-act="delrec">excluir este registro</button>' : '') +
+      (S.ctx.rec.via === 'foto' ? '<p class="ref">Valores lançados a partir de foto do ticket: confira com o original.</p>' : '') +
       '<p class="ref">Toque num campo e use o teclado. “Ant.” repete o valor da gasometria anterior; “próximo” segue para o campo e o grupo seguintes.</p>';
   }
   function fluidHint(r) {
@@ -776,6 +785,12 @@
           return live(false);
         }
         case 'bool': setV(t.dataset.f, getV(t.dataset.f) !== true); refreshRo(t.dataset.f); return live(false);
+        case 'scanCam': case 'scanAgain': closeKp(); $('#scanCamIn', pg).click(); return;
+        case 'scanPick': closeKp(); $('#scanPickIn', pg).click(); return;
+        case 'scanRot': S.scan.rot = (S.scan.rot + 90) % 360; return scanRun();
+        case 'scanTog': S.scan.on[t.dataset.sf] = !S.scan.on[t.dataset.sf]; return scanSheet();
+        case 'scanSmp': S.scan.smp = t.dataset.v; scanDefaults(); return scanSheet();
+        case 'scanApply': return scanApply();
         case 'acc': S.acc = S.acc === t.dataset.c ? null : t.dataset.c; live(false); return;
         case 'dxAll': S.dxAll = !S.dxAll; return live(false);
         case 'ts': {
@@ -825,6 +840,77 @@
     }
     if (t.dataset.ref !== undefined) return refSheet(pg, t.dataset.ref);
     if (t.dataset.f) openKp(t.dataset.f);
+  }
+
+  /* ---------- leitura por foto (scan.js): OCR no aparelho → conferência → lança nos campos ---------- */
+  /* amostra venosa: as pressões e a saturação vão para a gasometria venosa central; o resto vem desmarcado */
+  const VEN = { paco2: 'pvco2', pao2: 'pvo2', sao2: 'svo2' };
+  const scanTarget = (fid) => (S.scan.smp === 'ven' ? VEN[fid] || fid : fid);
+  const SCAN_MSG = { 'loading tesseract core': 'Carregando o leitor', 'initializing tesseract': 'Carregando o leitor', 'loading language traineddata': 'Carregando o leitor', 'initializing api': 'Preparando', 'recognizing text': 'Lendo o ticket', 'second pass': 'Tentando de novo com a foto original', zoom: 'Relendo os resultados ampliados' };
+  function scanDefaults() {
+    S.scan.on = {};
+    S.scan.res.items.forEach((it) => { S.scan.on[it.fid] = it.sure && (S.scan.smp !== 'ven' || !!VEN[it.fid]); });
+  }
+  function scanRun() {
+    const pg = S.pg, tok = (S.scan.tok = {});
+    const s = sheet(pg, `<div class="sc-prog" data-scan><h2>Lendo a foto</h2><b id="scMsg">Preparando</b><div class="sc-bar"><i id="scBar"></i></div>
+      <p class="fld-h">A leitura roda no próprio celular: a foto não sai do aparelho e não é guardada. Na primeira vez o leitor (≈ 7 MB) é baixado e fica disponível offline.</p></div>`);
+    const onProgress = (m) => {
+      if (S.scan.tok !== tok || !s.isConnected) return;
+      const msg = SCAN_MSG[m.status];
+      if (!msg) return;
+      $('#scMsg', s).textContent = msg + (m.status === 'recognizing text' ? ` · ${Math.round((m.progress || 0) * 100)}%` : '');
+      $('#scBar', s).style.width = Math.round((m.status === 'recognizing text' ? 0.25 + 0.75 * (m.progress || 0) : 0.2 * (m.progress || 0)) * 100) + '%';
+    };
+    C.scan.read(S.scan.file, { rot: S.scan.rot, onProgress }).then((res) => {
+      if (S.scan.tok !== tok || !$('[data-scan]', pg)) return; /* fechou a folha ou saiu da tela */
+      S.scan.res = res;
+      S.scan.smp = res.sample === 'ven' ? 'ven' : 'art';
+      scanDefaults();
+      scanSheet();
+    }).catch((err) => {
+      if (S.scan.tok !== tok || !$('[data-scan]', pg)) return;
+      sheet(pg, `<div data-scan><h2>Não foi possível ler</h2><p class="fld-h">${err && err.message === 'offline' ? 'O leitor ainda não foi baixado neste aparelho. Conecte-se à internet uma vez e tente de novo; depois funciona offline.' : 'A imagem não pôde ser processada. Tente outra foto.'}</p><div style="height:12px"></div><button type="button" class="btn primary block" data-act="scanAgain">${I.camera}Tirar outra foto</button></div>`);
+    });
+  }
+  function scanSheet() {
+    const pg = S.pg, sc = S.scan, res = sc.res;
+    const n = res.items.filter((it) => sc.on[it.fid]).length;
+    const old = $('.sh', pg), top = old ? old.scrollTop : 0;
+    const rows = res.items.map((it) => {
+      if (it.img === undefined) it.img = res.crop(it);
+      const tf = scanTarget(it.fid), cur = getV(tf), img = it.img;
+      return `<button type="button" class="sc-r${sc.on[it.fid] ? ' on' : ''}" data-act="scanTog" data-sf="${it.fid}" aria-pressed="${!!sc.on[it.fid]}">
+        <span class="box">${I.check}</span>
+        <span class="sc-t"><b>${F[tf].l}</b>${img ? `<img alt="trecho da foto" src="${img}">` : `<small>lido: ${esc(it.raw)} ${esc(it.unit)}</small>`}</span>
+        <span class="sc-v"><b>${numTxt(toDisp(tf, it.v))}</b><small>${unitOf(tf)}</small>${H(cur) ? `<small class="cur">atual ${numTxt(toDisp(tf, +cur))}</small>` : ''}</span>
+        ${it.note ? `<span class="sc-n">${esc(it.note)}</span>` : ''}</button>`;
+    }).join('');
+    const body = res.items.length
+      ? `<p class="fld-h">Compare cada valor com o recorte da foto. Só os marcados serão lançados.</p>
+        <div class="seg cols sc-smp"><button type="button" class="sg${sc.smp === 'art' ? ' on' : ''}" data-act="scanSmp" data-v="art">Arterial</button><button type="button" class="sg${sc.smp === 'ven' ? ' on' : ''}" data-act="scanSmp" data-v="ven">Venosa central</button></div>
+        <div class="sc-list">${rows}</div>
+        <button type="button" class="btn primary block" data-act="scanApply"${n ? '' : ' disabled'}>${n ? `Lançar ${n} valor${n > 1 ? 'es' : ''}` : 'Nada marcado'}</button>`
+      : `<p class="fld-h">Não encontrei valores de gasometria nesta foto. Ticket plano, sem reflexo, texto na horizontal e ocupando a tela ajudam; o modo "digitalizar documento" da câmera do celular dá o melhor resultado.</p>`;
+    sheet(pg, `<div data-scan><h2>Conferir leitura</h2>${body}
+      <div class="sc-more"><button type="button" class="btn sm" data-act="scanAgain">${I.camera}Outra foto</button><button type="button" class="btn sm" data-act="scanRot">${I.rotate}Girar e reler</button></div>
+      ${res.text ? `<details class="sc-raw"><summary>Texto lido</summary><pre>${esc(res.text)}</pre></details>` : ''}</div>`);
+    const sh = $('.sh', pg);
+    if (sh && top) { sh.style.animation = 'none'; sh.scrollTop = top; }
+  }
+  function scanApply() {
+    const { p, rec } = S.ctx, sc = S.scan;
+    const chosen = sc.res.items.filter((it) => sc.on[it.fid]);
+    chosen.forEach((it) => setV(scanTarget(it.fid), it.v));
+    rec.via = 'foto';
+    if (p) P.touch(p);
+    S.openG = chosen.some((it) => scanTarget(it.fid) !== it.fid) ? 'ven' : 'gaso';
+    S.scan = null;
+    closeSheet(S.pg);
+    S.tab = 'in';
+    live(true);
+    window.scrollTo(0, 0);
+    C.toast(`${chosen.length} valor${chosen.length > 1 ? 'es lançados' : ' lançado'} da foto`);
   }
 
   /* entrada na lista de calculadoras: a gasometria é a tela completa acima */
