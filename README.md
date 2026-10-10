@@ -19,7 +19,7 @@ Princípios: resumo primeiro e detalhe sob demanda; cor só no que está fora do
 
 ## Protocolos
 
-A aba Protocolos lê a pasta [`protocolos/`](protocolos/) deste repositório pela API do GitHub e guarda tudo em cache para uso offline. **Para publicar ou editar um protocolo basta criar/editar um `.md` na pasta pelo site do GitHub** — sem build. Regras (subpasta = categoria, cabeçalho opcional com `titulo/resumo/atualizado/autor/ordem`, arquivos iniciados por `_` ignorados) estão em [`protocolos/_LEIAME.md`](protocolos/_LEIAME.md); modelo em `protocolos/_modelo.md`. Os dois protocolos incluídos são **exemplos** a substituir pelos documentos oficiais do serviço.
+A aba Protocolos mostra os `.md` da pasta [`protocolos/`](protocolos/) deste repositório. **Para publicar ou editar um protocolo basta criar/editar o arquivo pelo site do GitHub** (ou pelo Obsidian no celular, ver o LEIAME): o push dispara o build, que copia a pasta para o site e gera `protocolos/index.json` com título, categoria, resumo etc. lidos do cabeçalho de cada arquivo (`web/scripts/protocolos.mjs`). Em 1–2 minutos está no ar. Tudo vem da mesma origem do app — sem API do GitHub nem limite de requisições — e entra no pré-cache do service worker: protocolos, imagens e links entre eles funcionam offline. A busca procura também no texto inteiro. Regras (subpasta = categoria, cabeçalho opcional com `titulo/categoria/resumo/atualizado/autor/ordem`, arquivos iniciados por `_` ignorados, imagens por caminho relativo) estão em [`protocolos/_LEIAME.md`](protocolos/_LEIAME.md); modelo em `protocolos/_modelo.md`. Os dois protocolos incluídos são **exemplos** a substituir pelos documentos oficiais do serviço.
 
 ## Estrutura
 
@@ -29,13 +29,16 @@ web/                          app novo (fonte)
   src/lib/                      calc.ts (ponte tipada), store.ts, patients.ts, router.ts, protocols.ts
   src/components/               ui.tsx (kit), pro.tsx (Segment, ListView, Sheet… substitutos do HeroUI Pro), InfusionCard.tsx, Shell.tsx
   src/tools/<grupo>/<id>.{calc.ts,tsx,test.ts}   uma calculadora = lógica pura + componente + testes
-  src/screens/                  Lock, Home, ToolPage, Patients, Settings, Protocols
+  src/screens/                  Lock, Home, ToolPage, Patients, Settings, Protocols (+ ProtocolBody, carregado sob demanda)
+  src/styles/                   app.css (tema + só os componentes HeroUI usados), fonts.css (Inter e IBM Plex Mono empacotadas)
+  src/legacy/*.test.ts          paridade dos motores com assets/js e a bateria do app anterior rodando no Vitest
   public/                       manifest.webmanifest, icons/
-  scripts/postbuild.mjs         gera dist/sw.js (pré-cache com hash) e copia o legado para dist/legado/
+  scripts/postbuild.mjs         gera dist/sw.js (pré-cache com hash), copia o legado para dist/legado/ e publica protocolos/
+  scripts/protocolos.mjs        índice dos protocolos (index.json) e servidor da pasta em desenvolvimento; frontmatter.mjs = cabeçalho
   CONVENTIONS.md                convenções para portar/criar calculadoras
-protocolos/                   protocolos em Markdown (lidos pelo app direto do GitHub)
+protocolos/                   protocolos em Markdown (publicados junto com o app a cada push)
 index.html, sw.js, manifest.webmanifest, assets/   app anterior (publicado em legado/)
-tests/                        304 testes do app anterior (abrir tests/index.html por HTTP)
+tests/                        bateria do app anterior (304 asserções; roda no `npm test` e também abrindo tests/index.html por HTTP)
 AUDITORIA.md, PESQUISA*.md    fórmulas conferidas, fontes e correções
 ```
 
@@ -46,7 +49,8 @@ Node 22+ (na máquina atual: `%USERPROFILE%\node`; a política do PowerShell blo
 ```
 npm install            (node_modules pode ser uma junção fora do OneDrive)
 npm run dev            http://localhost:5173/plantao/
-npm test               Vitest — 255 testes das calculadoras portadas (valores esperados conferidos à mão)
+npm test               Vitest — 255 testes das calculadoras portadas (valores esperados conferidos à mão),
+                       paridade byte a byte dos motores (src/legacy ↔ assets/js) e a bateria inteira do app anterior
 npm run typecheck      tsc --noEmit
 npm run build          vite build + scripts/postbuild.mjs → dist/ pronto para o GitHub Pages
 npm run preview        serve dist/ em http://localhost:4173/plantao/
@@ -95,8 +99,8 @@ Ver [`web/CONVENTIONS.md`](web/CONVENTIONS.md): `src/tools/<grupo>/<id>.calc.ts`
 
 ## Testes e auditoria
 
-- App novo: `npm test` em `web/` (Vitest). Cada calculadora portada tem o seu `*.test.ts` com as asserções originais de `tests/tests.js` mais casos de borda.
-- App anterior: `tests/index.html` (304 testes). Rode após qualquer alteração em `assets/js/`.
+- App novo: `npm test` em `web/` (Vitest). Cada calculadora portada tem o seu `*.test.ts` com as asserções originais de `tests/tests.js` mais casos de borda. O mesmo comando roda a bateria do app anterior (`src/legacy/suite.test.ts` carrega `tests/tests.js` no jsdom) e confere que `src/legacy/{core,engine}.js` são idênticos a `assets/js/` — o CI falha se um motor for corrigido só de um lado.
+- App anterior: `tests/index.html` (304 testes) continua funcionando no navegador, se quiser ver a tabela.
 - Fórmulas, fontes e correções: [AUDITORIA.md](AUDITORIA.md). Base do `engine.js`: [PESQUISA.md](PESQUISA.md); PCR: [PESQUISA-ACLS.md](PESQUISA-ACLS.md).
 
 ## Diferenças em relação aos arquivos originais

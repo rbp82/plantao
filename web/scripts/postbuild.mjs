@@ -2,12 +2,14 @@
    1. gera dist/sw.js com a lista de arquivos a pré-cachear (nomes com hash) e uma versão derivada do conteúdo;
    2. copia o app legado (../index.html, ../sw.js, ../manifest.webmanifest, ../assets/**) "plano" em dist/legado/,
       do mesmo jeito que build-deploy.ps1 fazia para a raiz;
-   3. cria .nojekyll.
+   3. publica ../protocolos/ em dist/protocolos/ com index.json gerado (scripts/protocolos.mjs) — entra no pré-cache;
+   4. cria .nojekyll.
    Uso: node scripts/postbuild.mjs (chamado por `npm run build`). */
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { publish as publishProtocolos } from './protocolos.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const web = resolve(here, '..');
@@ -31,6 +33,9 @@ const refs = (readFileSync(join(legado, 'index.html'), 'utf8') + readFileSync(jo
 const missing = [...refs].map((m) => m[1] || m[2]).filter((n) => n && !existsSync(join(legado, n)));
 if (missing.length) throw new Error('legado: arquivos citados e ausentes: ' + missing.join(', '));
 
+/* ---------- 3. protocolos ---------- */
+const protocolos = publishProtocolos(join(root, 'protocolos'), join(dist, 'protocolos'));
+
 /* ---------- 1. service worker ---------- */
 const files = walk(dist)
   .map((p) => relative(dist, p).split('\\').join('/'))
@@ -52,4 +57,4 @@ rmSync(join(dist, '.vite'), { recursive: true, force: true });
 
 const size = (p) => statSync(p).size;
 const total = walk(dist).reduce((s, p) => s + size(p), 0);
-console.log(`dist/ pronto: ${files.length} arquivos do app (pré-cache), legado em dist/legado/ (${walk(legado).length} arquivos), ${(total / 1048576).toFixed(1)} MB no total — sw ${version}`);
+console.log(`dist/ pronto: ${files.length} arquivos no pré-cache (incl. ${protocolos.length} de protocolos/), legado em dist/legado/ (${walk(legado).length} arquivos), ${(total / 1048576).toFixed(1)} MB no total — sw ${version}`);

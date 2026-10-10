@@ -1,5 +1,7 @@
 name: Deploy Plantão to GitHub Pages
 
+# Publicar = push na main (ou "Run workflow"). Requer Settings → Pages → Source = GitHub Actions.
+# O build (web/dist) já contém o app novo, o legado em legado/ e os protocolos em protocolos/ (com index.json).
 on:
   push:
     branches:
@@ -32,29 +34,21 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'web/package-lock.json'
 
-      - name: Install dependencies
+      - name: Install dependencies (lockfile exato)
         working-directory: ./web
-        run: npm ci || npm install
+        run: npm ci
 
-      - name: Run TypeScript typecheck
+      - name: Typecheck
         working-directory: ./web
         run: npm run typecheck
 
-      - name: Run unit tests
+      - name: Tests (calculadoras portadas, paridade dos motores e bateria do app anterior)
         working-directory: ./web
         run: npm test
 
-      - name: Build web application
+      - name: Build (Vite + postbuild: sw.js, legado/, protocolos/)
         working-directory: ./web
         run: npm run build
-
-      - name: Prepare deployment bundle
-        run: |
-          mkdir -p deploy-bundle
-          cp -r web/dist/* deploy-bundle/
-          if [ -d "protocolos" ]; then
-            cp -r protocolos deploy-bundle/
-          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -62,7 +56,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './deploy-bundle'
+          path: './web/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment

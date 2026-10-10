@@ -1,6 +1,6 @@
 {
     "name": "plantao-web",
-    "version": "4.0.1",
+    "version": "4.1.0",
     "scripts": {
         "dev": "vite",
         "build": "vite build && node scripts/postbuild.mjs",
@@ -13,6 +13,8 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@fontsource-variable/inter": "^5.3.0",
+        "@fontsource/ibm-plex-mono": "^5.3.0",
         "@heroui/react": "^3.2.6",
         "@heroui/styles": "^3.2.6",
         "@react-aria/utils": "^3.34.1",

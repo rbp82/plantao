@@ -4,7 +4,7 @@ App React 19 + Vite 8 + Tailwind v4 + HeroUI v3 (`@heroui/react`). Os componente
 
 ## Comandos (Windows; a política do PowerShell bloqueia `npx.ps1`, por isso `cmd /c npx.cmd`)
 Rode a partir de `web/`:
-- Testes: `cmd /c "npx.cmd vitest run"` (ou um arquivo: `cmd /c "npx.cmd vitest run src/tools/inf"`)
+- Testes: `cmd /c "npx.cmd vitest run"` (ou um arquivo: `cmd /c "npx.cmd vitest run src/tools/inf"`). Inclui `src/legacy/suite.test.ts` (bateria do app anterior) e `parity.test.ts` (src/legacy ↔ ../assets/js idênticos: ao corrigir um motor, copie para os dois lugares).
 - Tipos: `cmd /c "npx.cmd tsc --noEmit"`
 - Build: `cmd /c "npx.cmd vite build"`
 Um servidor de desenvolvimento pode já estar rodando em http://localhost:5173/plantao/ (não inicie outro).
@@ -38,6 +38,8 @@ Por baixo, o kit usa `@/components/pro` (API igual à do HeroUI Pro): `SegField`
 - `Section {title?, aux?}` — cartão. `Grid {cols: 2|3}` + `Span2`. `Lbl` (rótulo mono pequeno). `KV {rows: [[k, v]]}`. `Pill {cls}`. `CalcLine` (fórmula em mono). `Ref` (nota de fontes no rodapé). `Empty`.
 - Infusões: `InfusionCard {d, mode, peso, input, onInput}`, `ModeSwitch {mode, onChange}`, `useInfusionSet(chave, drugs, peso)` → `{ mode, switchMode, inputs, setInput, summary() }`; tipo `Drug` em `@/tools/infusion` (`band(d)` para faixas não lineares; `alerts(d, ctx)` devolve `[cls, html][]` — html é inserido com dangerouslySetInnerHTML, só texto próprio).
 - Ícones: `lucide-react`. Classes utilitárias Tailwind + tokens HeroUI (`text-muted`, `bg-surface`, `bg-accent-soft`, `text-danger`, `border-separator`…).
+- `src/styles/app.css` importa só o CSS dos componentes HeroUI usados: ao usar um componente novo de `@heroui/react`, acrescente o `@import "@heroui/styles/components/<nome>.css" layer(components)` correspondente.
+- Protocolos: `../protocolos/` é servida pelo Vite em `/plantao/protocolos/` (com `index.json` gerado na hora) — `src/lib/protocols.ts` lê daí tanto em dev quanto no site publicado.
 
 ## Princípios de interface (médico no plantão)
 Resumo primeiro, detalhe sob demanda; cor só no que está fora do normal; alvos de toque ≥ 44 px; números tabulares; uma coisa aberta por vez; sem botão "calcular" (tudo reativo). Nada de novas fontes, cores fora dos tokens ou texto genérico.

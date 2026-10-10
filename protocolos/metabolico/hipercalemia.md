@@ -1,5 +1,6 @@
 ---
 titulo: Hipercalemia
+categoria: Metabólico
 resumo: Estabilização da membrana, deslocamento e remoção de potássio
 atualizado: 2026-10-09
 autor: Exemplo — revisar e adaptar à instituição

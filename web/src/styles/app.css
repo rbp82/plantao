@@ -1,5 +1,33 @@
+/* Mesma estrutura em camadas de "@heroui/styles" (dist/index.css), mas importando só os componentes que o app usa:
+   o pacote inteiro traz 80+ componentes (~265 KB de CSS); os usados somam ~30 KB. Ao usar um componente novo
+   do @heroui/react, acrescente o .css correspondente aqui (lista em node_modules/@heroui/styles/dist/components/). */
+@layer theme, base, components, utilities;
 @import "tailwindcss";
-@import "@heroui/styles";
+@import "tw-animate-css";
+@import "@heroui/styles/base/base.css" layer(base);
+@import "@heroui/styles/base/scrollbar.css" layer(base);
+/* compartilhados primeiro (ordem importa) */
+@import "@heroui/styles/components/close-button.css" layer(components);
+@import "@heroui/styles/components/description.css" layer(components);
+@import "@heroui/styles/components/error-message.css" layer(components);
+@import "@heroui/styles/components/field-error.css" layer(components);
+@import "@heroui/styles/components/label.css" layer(components);
+@import "@heroui/styles/components/button.css" layer(components);
+@import "@heroui/styles/components/chip.css" layer(components);
+@import "@heroui/styles/components/alert.css" layer(components);
+@import "@heroui/styles/components/skeleton.css" layer(components);
+@import "@heroui/styles/components/spinner.css" layer(components);
+@import "@heroui/styles/components/toast.css" layer(components);
+@import "@heroui/styles/components/input.css" layer(components);
+@import "@heroui/styles/components/textfield.css" layer(components);
+@import "@heroui/styles/components/search-field.css" layer(components);
+@import "@heroui/styles/components/card.css" layer(components);
+@import "@heroui/styles/components/surface.css" layer(components);
+@import "@heroui/styles/components/separator.css" layer(components);
+@import "@heroui/styles/themes/default";
+@import "@heroui/styles/utilities";
+@import "@heroui/styles/variants";
+@import "./fonts.css";
 
 /* ------------------------------------------------------------------
    Plantão — identidade sobre o sistema HeroUI
@@ -77,3 +105,34 @@ body {
 .readout { font-family: var(--font-mono); font-weight: 600; letter-spacing: -0.02em; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ------------------------------------------------------------------
+   Protocolos: tipografia do Markdown (o preflight do Tailwind zera títulos, listas e tabelas)
+   ------------------------------------------------------------------ */
+.md { font-size: 15.5px; line-height: 1.6; overflow-wrap: break-word; }
+/* em tabelas, palavras inteiras: a tabela rola na horizontal em vez de quebrar "Noradrenalina" ao meio */
+.md th, .md td { overflow-wrap: normal; }
+.md > :first-child { margin-top: 0; }
+.md h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 14px; }
+.md h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; margin: 26px 0 8px; padding-top: 12px; border-top: 1px solid var(--separator); }
+.md h3 { font-size: 16px; font-weight: 650; margin: 18px 0 6px; }
+.md h4, .md h5, .md h6 { font-size: 15px; font-weight: 650; margin: 14px 0 4px; }
+.md p { margin: 0 0 10px; }
+.md ul, .md ol { margin: 0 0 12px; padding-left: 22px; }
+.md ul { list-style: disc; } .md ol { list-style: decimal; }
+.md li { margin: 3px 0; } .md li > p { margin: 0; }
+.md ul ul, .md ol ul { list-style: circle; margin-bottom: 0; }
+.md strong { font-weight: 650; }
+.md a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+.md blockquote { margin: 12px 0; padding: 10px 14px; border-left: 3px solid var(--warning); border-radius: 0 12px 12px 0; background: var(--warning-soft, color-mix(in oklch, var(--warning) 12%, transparent)); }
+.md blockquote p { margin: 0; }
+.md code { font-family: var(--font-mono); font-size: 0.92em; padding: 1px 5px; border-radius: 6px; background: var(--surface-secondary); }
+.md pre { margin: 12px 0; padding: 12px 14px; border-radius: 12px; background: var(--surface-secondary); overflow-x: auto; font-size: 13.5px; line-height: 1.5; }
+.md pre code { padding: 0; background: none; }
+.md hr { margin: 20px 0; border: 0; border-top: 1px solid var(--separator); }
+.md table { display: block; width: 100%; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: 12px 0 14px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.md thead th { text-align: left; font-weight: 650; font-size: 12.5px; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--separator); white-space: nowrap; }
+.md td { padding: 7px 10px; border-bottom: 1px solid var(--separator); vertical-align: top; }
+.md tbody tr:last-child td { border-bottom: 0; }
+.md img { display: block; max-width: 100%; height: auto; margin: 12px 0; border-radius: 12px; }
+.md input[type="checkbox"] { margin-right: 6px; }
