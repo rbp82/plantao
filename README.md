@@ -74,9 +74,13 @@ npm run deploy
 - `.\deploy.ps1 -SkipTests`: Pula a execução dos testes automatizados.
 - `.\deploy.ps1 -SkipTypecheck`: Pula a verificação de tipos.
 - `.\deploy.ps1 -OutputDir <caminho>`: Especifica pasta de saída personalizada.
-- `.\deploy.ps1 -Push -Message "Mensagem do commit"`: Se o Git estiver configurado, realiza o commit e push automaticamente.
+- `.\deploy.ps1 -Push -Message "Mensagem do commit"`: Se o Git estiver configurado, realiza o commit e push da branch `main` e publica os artefatos compilados na branch `gh-pages` automaticamente.
 
-Além disso, o repositório conta com workflow de CI/CD automatizado via **GitHub Actions** em `.github/workflows/deploy.yml` que testa, compila e publica no GitHub Pages automaticamente a cada push na branch `main`.
+### Configuração do GitHub Pages no repositório
+No GitHub (**Settings** > **Pages**):
+1. Em **Build and deployment** > **Source**, selecione **Deploy from a branch**.
+2. Em **Branch**, selecione **`gh-pages`** e a pasta **`/ (root)`**.
+3. Clique em **Save**. O site estará disponível em **https://rbp82.github.io/plantao/**.
 
 - O `sw.js` do app novo é gerado a cada build com a versão `plantao-web-<package.json version>-<hash do conteúdo>`: **não precisa editar nada** — qualquer build diferente vira uma versão nova, instalada em segundo plano e aplicada na próxima troca de tela.
 - O legado tem o próprio service worker em `legado/sw.js`: ao alterar qualquer arquivo do app anterior (`assets/**`, `index.html`), **incremente `VERSION` em `sw.js`** da raiz, como antes. Os dois service workers convivem (cada um só apaga os caches com o próprio prefixo).
