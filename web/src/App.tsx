@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Toast, toast } from '@heroui/react';
 import { C } from '@/lib/calc';
-import { useRoute } from '@/lib/router';
+import { useRoute, navigate } from '@/lib/router';
 import { useStoreVersion, useVaultState, bump } from '@/lib/store';
-import { BottomNav } from '@/components/Shell';
+import { BottomNav, LEGACY } from '@/components/Shell';
 import { Lock, Unsupported } from '@/screens/Lock';
 import { Home } from '@/screens/Home';
 import { ToolPage } from '@/screens/ToolPage';
@@ -59,6 +59,8 @@ export function App() {
   else if (path === 'ajustes' || path === 'seguranca') screen = <Settings />;
   else if (path === 'protocolos') screen = <Protocols query={query} />;
   else if (path === 'protocolo') screen = <ProtocolView slug={query.get('id') || ''} />;
+  /* #/pcr (atalhos e links antigos): o ACLS guiado vive no app anterior; troca o hash para não voltar aqui pelo "voltar" */
+  else if (path === 'pcr') { navigate('/', true); C.Vault.go(LEGACY('#/pcr')); screen = null; }
   else {
     const t = findTool(path);
     if (t && t.href) { C.Vault.go(t.href); screen = null; }
