@@ -1,7 +1,7 @@
 /* Tela inicial: busca, PCR, paciente ativo, fixadas, recentes e categorias (uma aberta por vez). */
 import { useEffect, useMemo, useState } from 'react';
 import { Button, SearchField } from '@heroui/react';
-import { ItemCard, ListView } from '@heroui-pro/react';
+import { ItemCard, ListView } from '@/components/pro';
 import { ChevronDown, ChevronRight, HeartPulse, LockKeyhole, Moon, Sun, SunMoon, UserRound } from 'lucide-react';
 import { C } from '@/lib/calc';
 import { useStore, useVaultState, applyTheme, type Theme, bump } from '@/lib/store';

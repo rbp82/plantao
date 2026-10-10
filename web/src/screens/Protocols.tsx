@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button, SearchField, Skeleton, toast } from '@heroui/react';
-import { ListView } from '@heroui-pro/react';
+import { ListView } from '@/components/pro';
 import { BookOpenText, ChevronRight, CloudOff, ExternalLink, FilePlus2, RefreshCw, SearchX } from 'lucide-react';
 import { C } from '@/lib/calc';
 import { TopBar, Page } from '@/components/Shell';

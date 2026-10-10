@@ -3,7 +3,7 @@
    alvos de toque ≥ 44 px; números tabulares. Construído sobre HeroUI (OSS + Pro). */
 import { Children, cloneElement, isValidElement, useId, type ReactElement, type ReactNode } from 'react';
 import { Alert, Card, Chip, Description, FieldError, Input, Label, TextField } from '@heroui/react';
-import { CheckboxButtonGroup, EmptyState, RadioButtonGroup, Segment, Timeline } from '@heroui-pro/react';
+import { CheckboxButtonGroup, EmptyState, RadioButtonGroup, Segment, Timeline } from '@/components/pro';
 import type { Cls } from '@/lib/calc';
 import { num } from '@/lib/calc';
 

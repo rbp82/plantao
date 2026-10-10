@@ -1,7 +1,7 @@
 /* Cartão de droga em infusão contínua: diluição editável (salva no cofre), vazão ↔ dose. */
 import { useState } from 'react';
 import { Button, Card } from '@heroui/react';
-import { Segment } from '@heroui-pro/react';
+import { Segment } from '@/components/pro';
 import { Lock, Pencil } from 'lucide-react';
 import { C, num } from '@/lib/calc';
 import { useStore } from '@/lib/store';

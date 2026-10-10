@@ -11,7 +11,7 @@ export default defineConfig({
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: { port: 5173, strictPort: true },
   /* pré-otimiza tudo de uma vez: evita reotimização no meio da sessão (que duplica o React) */
-  optimizeDeps: { include: ['react', 'react-dom', 'react-dom/client', '@heroui/react', '@heroui-pro/react', 'lucide-react', 'react-markdown', 'remark-gfm'] },
+  optimizeDeps: { include: ['react', 'react-dom', 'react-dom/client', '@heroui/react', 'lucide-react', 'react-markdown', 'remark-gfm'] },
   build: {
     target: 'es2022',
     sourcemap: false,

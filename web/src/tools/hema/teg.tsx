@@ -1,6 +1,6 @@
 /* Tromboelastograma — interpretação e hemocomponente por parâmetro. Lógica e traçado em teg.calc.ts. */
 import { useEffect, useState } from 'react';
-import { CellSlider } from '@heroui-pro/react';
+import { CellSlider } from '@/components/pro';
 import { Dose, Lbl, NumField, Ref, Section, Steps, Verdict, type Step } from '@/components/ui';
 import { num } from '@/lib/calc';
 import { registerTool, type ToolProps } from '@/tools/registry';

@@ -2,7 +2,7 @@
    O quadro completo (ficha, gasometrias com tendência) ainda abre no app anterior, com o mesmo cofre. */
 import { useState, type FormEvent } from 'react';
 import { Button, Input, Label, TextField, toast } from '@heroui/react';
-import { ListView } from '@heroui-pro/react';
+import { ListView } from '@/components/pro';
 import { Check, ExternalLink, Plus } from 'lucide-react';
 import { C } from '@/lib/calc';
 import { useStore, useVaultState } from '@/lib/store';

@@ -1,6 +1,6 @@
 /* Troca rápida de paciente sem sair da calculadora: HeroUI Pro Sheet (de baixo) com a lista do plantão. */
 import { Button, toast } from '@heroui/react';
-import { ListView, Sheet } from '@heroui-pro/react';
+import { ListView, Sheet } from '@/components/pro';
 import { Check, Plus } from 'lucide-react';
 import { C } from '@/lib/calc';
 import { useActivePatient, usePatientList } from '@/lib/patients';
