@@ -182,15 +182,38 @@ if (($Commit -or $Push) -and $gitCmd) {
     }
 
     & git add -A
-    & git commit -m "$Message"
+    $status = (& git status --porcelain)
+    if ($status) {
+        & git commit -m "$Message"
+    }
     if ($Push) {
-        Write-Host "   Enviando para o repositorio remoto (git push)..." -ForegroundColor Yellow
         $currentBranch = (& git branch --show-current).Trim()
+        Write-Host "   Enviando branch principal ($currentBranch)..." -ForegroundColor Yellow
         $hasUpstream = (& git rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2>$null)
         if (-not $hasUpstream) {
             & git push -u origin $currentBranch
         } else {
             & git push
+        }
+
+        Write-Host "   Publicando artefatos compilados na branch gh-pages..." -ForegroundColor Yellow
+        $remoteUrl = (& git config --get remote.origin.url)
+        if ($remoteUrl) {
+            Push-Location $OutputDir
+            try {
+                if (-not (Test-Path ".git")) {
+                    & git init -b gh-pages | Out-Null
+                    & git config user.name "Rafael Braz"
+                    & git config user.email "rbp82@users.noreply.github.com"
+                    & git remote add origin $remoteUrl 2>$null
+                }
+                & git add -A
+                & git commit -m "$Message" 2>$null
+                & git push -f origin gh-pages
+                Write-Host "   [OK] Branch gh-pages atualizada com sucesso!" -ForegroundColor Green
+            } finally {
+                Pop-Location
+            }
         }
     }
     Write-Host "   [OK] Operacoes Git concluidas com sucesso!" -ForegroundColor Green
