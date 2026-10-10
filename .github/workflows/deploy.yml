@@ -46,7 +46,7 @@ jobs:
         working-directory: ./web
         run: npm test
 
-      - name: Build (Vite + postbuild: sw.js, legado/, protocolos/)
+      - name: "Build (Vite + postbuild — sw.js, legado/, protocolos/)"
         working-directory: ./web
         run: npm run build
 
