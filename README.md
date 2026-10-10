@@ -6,7 +6,7 @@ App web mobile-first, instalável e offline, para plantão de UTI e emergência:
 
 | | Onde | O quê |
 |---|---|---|
-| **App novo** (`web/`) | `/plantao/` | React 19 + HeroUI v3/Pro + Tailwind v4. Tela inicial, busca, todas as calculadoras, aba **Protocolos**, lista de pacientes, ajustes/segurança. |
+| **App novo** (`web/`) | `/plantao/` | React 19 + HeroUI v3 (`@heroui/react`) + Tailwind v4, com componentes próprios em `src/components/pro.tsx` no lugar do HeroUI Pro. Tela inicial, busca, todas as calculadoras, aba **Protocolos**, lista de pacientes, ajustes/segurança. |
 | **App anterior** (raiz) | `/plantao/legado/` | Vanilla JS. Ainda responde por **Leitos (quadro completo, ficha, gasometria com tendência e leitura por foto)** e **PCR guiada**. Fase 2: portar para o app novo. |
 
 Os dois compartilham o mesmo cofre criptografado (`localStorage` da mesma origem) e **a sessão passa de um para o outro sem pedir a senha de novo** (`Vault.handoff()`/`resume()` em `assets/js/core.js`: a chave de dados, não exportável, atravessa pelo IndexedDB com validade de 60 s e é apagada ao ser lida). O mesmo mecanismo evita pedir a senha quando o app recarrega para aplicar uma atualização.
@@ -27,7 +27,7 @@ A aba Protocolos lê a pasta [`protocolos/`](protocolos/) deste repositório pel
 web/                          app novo (fonte)
   src/legacy/{core,engine}.js   cópias idênticas dos motores auditados (window.Calc)
   src/lib/                      calc.ts (ponte tipada), store.ts, patients.ts, router.ts, protocols.ts
-  src/components/               ui.tsx (kit), InfusionCard.tsx, Shell.tsx
+  src/components/               ui.tsx (kit), pro.tsx (Segment, ListView, Sheet… substitutos do HeroUI Pro), InfusionCard.tsx, Shell.tsx
   src/tools/<grupo>/<id>.{calc.ts,tsx,test.ts}   uma calculadora = lógica pura + componente + testes
   src/screens/                  Lock, Home, ToolPage, Patients, Settings, Protocols
   public/                       manifest.webmanifest, icons/
@@ -52,35 +52,29 @@ npm run build          vite build + scripts/postbuild.mjs → dist/ pronto para 
 npm run preview        serve dist/ em http://localhost:4173/plantao/
 ```
 
-HeroUI Pro exige login (`cmd /c "npx.cmd heroui-pro@latest login"`) para instalar `@heroui-pro/react`.
+Só dependências públicas do npm: o HeroUI Pro (que exigia login) foi substituído por componentes próprios em `src/components/pro.tsx`, por isso o build roda no GitHub Actions sem credenciais.
 
-## Publicação e Deploy (GitHub Pages)
+## Publicação (GitHub Pages via GitHub Actions)
 
-Para gerar o pacote de deploy e publicar:
+**Publicar = fazer push na branch `main`.** O workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) roda typecheck, os testes (Vitest), `npm run build` (Vite + postbuild) e envia `web/dist/` (app novo, `legado/` e `protocolos/`) para o GitHub Pages com `actions/deploy-pages`. Em 1–2 minutos o site em **https://rbp82.github.io/plantao/** está atualizado. Dá para disparar à mão em **Actions → Deploy Plantão to GitHub Pages → Run workflow**.
+
+Configuração necessária no repositório (feita uma vez): **Settings → Pages → Build and deployment → Source = GitHub Actions**. Com *Deploy from a branch* o Pages passa a servir a raiz da branch com Jekyll (o app antigo, e os `.md` de `protocolos/` virando `.html`) e ignora o workflow. A branch `gh-pages` que existiu durante a migração não é mais usada e pode ser apagada.
+
+### Build local (opcional)
+
+`deploy.ps1` reproduz localmente o que o workflow faz e deixa o resultado em `deploy/github-pages/` para conferir antes de publicar:
 
 ```
-# Opção 1: Via script PowerShell (na raiz do projeto)
-.\deploy.ps1
-
-# Opção 2: Via CMD / Prompt de Comando (ou duplo clique)
-deploy.cmd
-
-# Opção 3: Dentro da pasta web/ via npm
-npm run deploy
+.\deploy.ps1                    typecheck + testes + build + pacote em deploy/github-pages
+deploy.cmd                      o mesmo, para duplo clique / Prompt de Comando
+npm run deploy                  o mesmo, de dentro de web/
+.\deploy.ps1 -SkipTests         pula os testes          -SkipTypecheck pula o tsc
+.\deploy.ps1 -OutputDir <pasta> pasta de saída personalizada
+.\deploy.ps1 -Commit            commit das alterações (mensagem com -Message "…")
+.\deploy.ps1 -Push              commit + push da main — e é o push que publica
 ```
 
-### Parâmetros úteis do `deploy.ps1`
-- `.\deploy.ps1`: Executa typecheck, testes (Vitest), build (Vite + Postbuild) e gera a pasta `deploy/github-pages` com o app novo, legado (`legado/`) e protocolos (`protocolos/`).
-- `.\deploy.ps1 -SkipTests`: Pula a execução dos testes automatizados.
-- `.\deploy.ps1 -SkipTypecheck`: Pula a verificação de tipos.
-- `.\deploy.ps1 -OutputDir <caminho>`: Especifica pasta de saída personalizada.
-- `.\deploy.ps1 -Push -Message "Mensagem do commit"`: Se o Git estiver configurado, realiza o commit e push da branch `main` e publica os artefatos compilados na branch `gh-pages` automaticamente.
-
-### Configuração do GitHub Pages no repositório
-No GitHub (**Settings** > **Pages**):
-1. Em **Build and deployment** > **Source**, selecione **Deploy from a branch**.
-2. Em **Branch**, selecione **`gh-pages`** e a pasta **`/ (root)`**.
-3. Clique em **Save**. O site estará disponível em **https://rbp82.github.io/plantao/**.
+### Versões e service workers
 
 - O `sw.js` do app novo é gerado a cada build com a versão `plantao-web-<package.json version>-<hash do conteúdo>`: **não precisa editar nada** — qualquer build diferente vira uma versão nova, instalada em segundo plano e aplicada na próxima troca de tela.
 - O legado tem o próprio service worker em `legado/sw.js`: ao alterar qualquer arquivo do app anterior (`assets/**`, `index.html`), **incremente `VERSION` em `sw.js`** da raiz, como antes. Os dois service workers convivem (cada um só apaga os caches com o próprio prefixo).

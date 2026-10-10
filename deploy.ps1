@@ -195,26 +195,6 @@ if (($Commit -or $Push) -and $gitCmd) {
         } else {
             & git push
         }
-
-        Write-Host "   Publicando artefatos compilados na branch gh-pages..." -ForegroundColor Yellow
-        $remoteUrl = (& git config --get remote.origin.url)
-        if ($remoteUrl) {
-            Push-Location $OutputDir
-            try {
-                if (-not (Test-Path ".git")) {
-                    & git init -b gh-pages | Out-Null
-                    & git config user.name "Rafael Braz"
-                    & git config user.email "rbp82@users.noreply.github.com"
-                    & git remote add origin $remoteUrl 2>$null
-                }
-                & git add -A
-                & git commit -m "$Message" 2>$null
-                & git push -f origin gh-pages
-                Write-Host "   [OK] Branch gh-pages atualizada com sucesso!" -ForegroundColor Green
-            } finally {
-                Pop-Location
-            }
-        }
     }
     Write-Host "   [OK] Operacoes Git concluidas com sucesso!" -ForegroundColor Green
 } elseif ($Commit -or $Push) {

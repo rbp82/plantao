@@ -1,6 +1,6 @@
 # Plantão (web/) — convenções para portar calculadoras
 
-App React 19 + Vite 8 + Tailwind v4 + HeroUI v3 (`@heroui/react`) + HeroUI Pro (`@heroui-pro/react`). Rotas por hash. Mobile-first (375 px).
+App React 19 + Vite 8 + Tailwind v4 + HeroUI v3 (`@heroui/react`). Os componentes que vinham do HeroUI Pro (Segment, ListView, ItemCard, RadioButtonGroup, CheckboxButtonGroup, Timeline, EmptyState, Sheet, CellSlider) são implementações próprias em `src/components/pro.tsx`, com a mesma API composta. Rotas por hash. Mobile-first (375 px).
 
 ## Comandos (Windows; a política do PowerShell bloqueia `npx.ps1`, por isso `cmd /c npx.cmd`)
 Rode a partir de `web/`:
@@ -25,7 +25,7 @@ Um servidor de desenvolvimento pode já estar rodando em http://localhost:5173/p
 6. Valores guardados entre sessões (ex.: modo, diluições, aba escolhida): `useStore(chave, padrão)` de `@/lib/store`.
 
 ## Kit (`@/components/ui`)
-Por baixo, o kit usa HeroUI Pro: `SegField` = Segment · `PickGrid`/`ChoiceList` = RadioButtonGroup · `CheckGroup`/`CheckRow` = CheckboxButtonGroup · `Steps` = Timeline · `Empty` = EmptyState. Listas de navegação usam `ListView`, cartões de acesso rápido `ItemCard`, a troca de paciente na faixa de peso abre um `Sheet`, e os controles deslizantes do TEG são `CellSlider`. Use o kit, não os componentes Pro diretamente, para manter o visual uniforme.
+Por baixo, o kit usa `@/components/pro` (API igual à do HeroUI Pro): `SegField` = Segment · `PickGrid`/`ChoiceList` = RadioButtonGroup · `CheckGroup`/`CheckRow` = CheckboxButtonGroup · `Steps` = Timeline · `Empty` = EmptyState. Listas de navegação usam `ListView`, cartões de acesso rápido `ItemCard`, a troca de paciente na faixa de peso abre um `Sheet`, e os controles deslizantes do TEG são `CellSlider`. Use o kit, não os componentes de `pro.tsx` diretamente, para manter o visual uniforme.
 - `NumField {label, value, onChange, unit?, placeholder?, hint?, lim?: [min,max], optional?}` — campo numérico (teclado decimal, parse pt-BR, marca fora do plausível). Use `lim` como no antigo (`lim:` / `C.LIM`).
 - `SegField {label?, value, onChange, options: [{value, label, small?}]}` — escolha única em segmentos (2–4 opções curtas).
 - `PickGrid {label?, value, onChange, options: [{value, label, small?}], cols?: 2|3}` — escolha única em grade compacta (5+ opções curtas, ou 3 opções com legenda que não cabem num Segment a 375 px).
