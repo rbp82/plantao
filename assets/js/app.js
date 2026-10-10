@@ -503,10 +503,14 @@
     nav.hidden = false;
     document.body.classList.add('has-nav');
     const a = Patients.active();
+    /* publicado em legado/ (abaixo do app novo): "Calculadoras" volta para o app novo */
+    const home = /\/legado\//.test(location.pathname) ? '../#/' : '#/';
     nav.innerHTML = `
-      <a href="#/" class="${where === 'calc' ? 'on' : ''}">${I.grid}<span>Calculadoras</span></a>
+      <a href="${home}" class="${where === 'calc' ? 'on' : ''}" ${home !== '#/' ? 'data-app' : ''}>${I.grid}<span>Calculadoras</span></a>
       <a href="#/gaso?novo=1" class="bn-main" aria-label="Nova gasometria ${a ? 'para ' + esc(Patients.name(a)) : 'avulsa'}">${I.plus}<span>Gaso</span></a>
       <a href="#/leitos" class="${where === 'leitos' ? 'on' : ''}">${I.beds}<span>Leitos</span></a>`;
+    const toApp = nav.querySelector('a[data-app]');
+    if (toApp) toApp.addEventListener('click', (e) => { e.preventDefault(); Vault.go(toApp.getAttribute('href')); });
   }
 
   /* ---------- rotas ---------- */
@@ -552,5 +556,6 @@
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
   }
 
-  route();
+  /* sessão trazida do app novo (legado/), se houver; senão, tela de senha */
+  Vault.resume().catch(() => false).then(route);
 })();

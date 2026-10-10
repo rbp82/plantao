@@ -1,27 +1,27 @@
 /* Service worker — app offline-first. Ao alterar qualquer arquivo, incremente VERSION. */
-const VERSION = 'plantao-v7';
+const VERSION = 'plantao-v8';
 const SHELL = [
   './',
   'index.html',
   'manifest.webmanifest',
-  'app.css',
-  'core.js',
-  'engine.js',
-  'beds.js',
-  'scan.js',
-  'pcr.js',
-  'app.js',
-  'hemo.js',
-  'inf.js',
-  'sed.js',
-  'met.js',
-  'hema.js',
-  'delta.js',
-  'icon.svg',
-  'icon-192.png',
-  'icon-512.png',
-  'maskable-512.png',
-  'apple-touch-icon.png',
+  'assets/css/app.css',
+  'assets/js/core.js',
+  'assets/js/engine.js',
+  'assets/js/beds.js',
+  'assets/js/scan.js',
+  'assets/js/pcr.js',
+  'assets/js/app.js',
+  'assets/js/tools/hemo.js',
+  'assets/js/tools/inf.js',
+  'assets/js/tools/sed.js',
+  'assets/js/tools/met.js',
+  'assets/js/tools/hema.js',
+  'assets/js/tools/delta.js',
+  'assets/icons/icon.svg',
+  'assets/icons/icon-192.png',
+  'assets/icons/icon-512.png',
+  'assets/icons/maskable-512.png',
+  'assets/icons/apple-touch-icon.png',
 ];
 const FONTS = 'plantao-fonts';
 /* leitor de foto (Tesseract, ≈ 7 MB): baixado só no primeiro uso e mantido entre versões do app */
@@ -35,7 +35,8 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== FONTS && k !== OCR).map((k) => caches.delete(k))))
+      /* o Cache Storage é da origem inteira (dividido com o app novo em ../): só apaga versões antigas deste app */
+      .then((keys) => Promise.all(keys.filter((k) => /^plantao-v\d+$/.test(k) && k !== VERSION).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

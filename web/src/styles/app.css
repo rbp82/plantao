@@ -1,0 +1,80 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+@import "@heroui-pro/react/css";
+
+/* ------------------------------------------------------------------
+   Plantão — identidade sobre o sistema HeroUI
+   Marca: verde-petróleo; fundo quente off-white no claro.
+   Estados clínicos usam os tokens semânticos do HeroUI:
+   success = dentro da faixa · warning = atenção · danger = crítico.
+   ------------------------------------------------------------------ */
+:root,
+[data-theme="light"] {
+  --radius: 0.75rem;
+  --background: oklch(0.975 0.004 85);
+  --surface: oklch(1 0 0);
+  --surface-secondary: oklch(0.965 0.004 85);
+  --accent: oklch(0.47 0.085 170);
+  --accent-foreground: oklch(0.99 0 0);
+  --link: var(--accent);
+  --focus: var(--accent);
+  --success: oklch(0.6 0.14 150);
+  --success-foreground: oklch(0.99 0 0);
+  --warning: oklch(0.72 0.15 70);
+  --warning-foreground: oklch(0.2 0.02 70);
+  --danger: oklch(0.58 0.2 25);
+  --danger-foreground: oklch(0.99 0 0);
+  --field-background: oklch(0.965 0.004 85);
+  --font-sans: "Inter", "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.dark,
+[data-theme="dark"] {
+  --background: oklch(0.14 0.004 85);
+  --surface: oklch(0.2 0.005 85);
+  --surface-secondary: oklch(0.24 0.005 85);
+  --accent: oklch(0.78 0.11 170);
+  --accent-foreground: oklch(0.15 0.03 170);
+  --link: var(--accent);
+  --focus: var(--accent);
+  --success: oklch(0.76 0.14 150);
+  --success-foreground: oklch(0.15 0.03 150);
+  --warning: oklch(0.82 0.14 76);
+  --warning-foreground: oklch(0.2 0.03 76);
+  --danger: oklch(0.72 0.17 25);
+  --danger-foreground: oklch(0.15 0.03 25);
+  --field-background: oklch(0.24 0.005 85);
+}
+
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  /* cores por grupo de calculadoras (só para o azulejo de identificação) */
+  --color-g-emerg: var(--danger);
+  --color-g-hemo: oklch(0.55 0.17 25);
+  --color-g-resp: oklch(0.55 0.13 240);
+  --color-g-sed: oklch(0.5 0.14 285);
+  --color-g-inf: oklch(0.52 0.12 160);
+  --color-g-met: oklch(0.6 0.14 65);
+  --color-g-hema: oklch(0.5 0.15 350);
+}
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  @apply bg-background text-foreground font-sans antialiased;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* números sempre tabulares: resultados alinham nas colunas */
+.num, input { font-variant-numeric: tabular-nums; }
+
+/* área segura do iPhone com barra inferior fixa */
+.safe-top { padding-top: env(safe-area-inset-top, 0px); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+/* resultado grande (readout) */
+.readout { font-family: var(--font-mono); font-weight: 600; letter-spacing: -0.02em; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

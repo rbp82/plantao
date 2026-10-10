@@ -13,13 +13,13 @@
 <meta name="apple-mobile-web-app-title" content="Plantão">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="assets/css/app.css">
 <script>
   /* aplica o tema antes de pintar, evitando flash */
   try { var t = JSON.parse(localStorage.getItem('plantao:theme')); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -28,17 +28,17 @@
 <body>
 <div id="app"></div>
 <noscript><p style="padding:24px">Ative o JavaScript para usar as calculadoras.</p></noscript>
-<script src="core.js"></script>
-<script src="engine.js"></script>
-<script src="beds.js"></script>
-<script src="scan.js" data-ocr=""></script>
-<script src="pcr.js"></script>
-<script src="hemo.js"></script>
-<script src="inf.js"></script>
-<script src="sed.js"></script>
-<script src="met.js"></script>
-<script src="hema.js"></script>
-<script src="delta.js"></script>
-<script src="app.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/engine.js"></script>
+<script src="assets/js/beds.js"></script>
+<script src="assets/js/scan.js" data-ocr="assets/ocr/"></script>
+<script src="assets/js/pcr.js"></script>
+<script src="assets/js/tools/hemo.js"></script>
+<script src="assets/js/tools/inf.js"></script>
+<script src="assets/js/tools/sed.js"></script>
+<script src="assets/js/tools/met.js"></script>
+<script src="assets/js/tools/hema.js"></script>
+<script src="assets/js/tools/delta.js"></script>
+<script src="assets/js/app.js"></script>
 </body>
 </html>

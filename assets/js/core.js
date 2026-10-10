@@ -304,7 +304,48 @@
       LS.keys().filter((k) => k !== 'theme').forEach((k) => LS.del(k));
       mem = null; vkey = null; persistent = false;
     },
+
+    /* ---- passagem de sessão entre o app novo (../) e o legado (legado/) ----
+       A DEK (CryptoKey não exportável) vai pelo IndexedDB, vale 60 s e é apagada ao ser lida,
+       para não pedir a senha a cada troca de tela entre os dois apps. O JS nunca vê os bytes da chave. */
+    async handoff() {
+      if (!vkey || !persistent) return false;
+      await C.Vault.flush();
+      await handoffDb('readwrite', (s) => s.put({ key: vkey, exp: Date.now() + 60000 }, 'dek'));
+      return true;
+    },
+    async resume() {
+      if (mem !== null) return true;
+      let rec;
+      try { rec = await handoffDb('readwrite', (s) => { const r = s.get('dek'); s.delete('dek'); return r; }); } catch (e) { return false; }
+      if (!rec || !rec.key || rec.exp < Date.now()) return false;
+      const v = readVault();
+      if (!v) return false;
+      try { mem = await openObj(rec.key, v.data); } catch (e) { return false; }
+      vkey = rec.key; persistent = true;
+      return true;
+    },
+    /* navega para o outro app levando a sessão */
+    async go(url) {
+      try { await C.Vault.handoff(); } catch (e) { /* sem IndexedDB: o outro app pede a senha */ }
+      location.href = url;
+    },
   };
+  function handoffDb(mode, fn) {
+    return new Promise((resolve, reject) => {
+      if (!window.indexedDB) { reject(new Error('sem-idb')); return; }
+      const open = indexedDB.open('plantao-handoff', 1);
+      open.onupgradeneeded = () => open.result.createObjectStore('k');
+      open.onerror = () => reject(open.error);
+      open.onsuccess = () => {
+        const db = open.result;
+        const tx = db.transaction('k', mode);
+        const req = fn(tx.objectStore('k'));
+        tx.oncomplete = () => { db.close(); resolve(req && req.result); };
+        tx.onerror = () => { db.close(); reject(tx.error); };
+      };
+    });
+  }
 
   /* ---------- ícones ---------- */
   const I = {

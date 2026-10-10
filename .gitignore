@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+web/node_modules/
+
+# Build outputs
+dist/
+web/dist/
+.vite/
+web/.vite/
+deploy/
+
+# IDE & Tooling
+.idea/
+.claude/
+*.local
+
+# System & Logs
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plantão — testes</title>
+<style>
+  body { font: 14px/1.45 system-ui, sans-serif; margin: 0; padding: 16px; background: #fff; color: #111; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  #sum { font-size: 16px; font-weight: 700; margin: 8px 0 16px; }
+  .ok { color: #1d7046; } .bad { color: #b02a1f; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { text-align: left; padding: 5px 8px; border-top: 1px solid #ddd; vertical-align: top; }
+  th { font-size: 12px; color: #666; }
+  td.r { white-space: nowrap; font-weight: 700; }
+  tr.g td { background: #f3f2ee; font-weight: 700; }
+  #sandbox { position: absolute; left: -9999px; top: 0; width: 375px; }
+</style>
+</head>
+<body>
+<h1>Plantão — bateria de testes</h1>
+<div>Valores esperados calculados à mão a partir das fórmulas de referência; o teste roda o código real do app.</div>
+<div id="sum">Rodando…</div>
+<table><thead><tr><th>Resultado</th><th>Teste</th><th>Esperado</th><th>Obtido</th></tr></thead><tbody id="out"></tbody></table>
+<div id="sandbox"></div>
+
+<script>
+  /* isola o localStorage do app durante os testes e restaura no fim */
+  const BACKUP = {};
+  for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('plantao:')) BACKUP[k] = localStorage.getItem(k); }
+  Object.keys(BACKUP).forEach((k) => localStorage.removeItem(k));
+  window.addEventListener('beforeunload', restore);
+  function restore() {
+    for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith('plantao:')) localStorage.removeItem(k); }
+    Object.entries(BACKUP).forEach(([k, v]) => localStorage.setItem(k, v));
+  }
+</script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/beds.js"></script>
+<script src="../assets/js/scan.js"></script>
+<script src="../assets/js/pcr.js"></script>
+<script src="../assets/js/tools/hemo.js"></script>
+<script src="../assets/js/tools/inf.js"></script>
+<script src="../assets/js/tools/sed.js"></script>
+<script src="../assets/js/tools/met.js"></script>
+<script src="../assets/js/tools/hema.js"></script>
+<script src="../assets/js/tools/delta.js"></script>
+<script src="tests.js"></script>
+</body>
+</html>

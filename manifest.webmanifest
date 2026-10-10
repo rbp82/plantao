@@ -11,16 +11,16 @@
   "theme_color": "#F3F2EE",
   "categories": ["medical", "utilities"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
   "shortcuts": [
-    { "name": "PCR — ACLS guiado", "url": "./#/pcr", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "Nova gasometria", "url": "./#/gaso?novo=1", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "Leitos", "url": "./#/leitos", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "Drogas vasoativas", "url": "./#/dva", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "Ajuste renal de ATB", "url": "./#/atb", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+    { "name": "PCR — ACLS guiado", "url": "./#/pcr", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Nova gasometria", "url": "./#/gaso?novo=1", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Leitos", "url": "./#/leitos", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Drogas vasoativas", "url": "./#/dva", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Ajuste renal de ATB", "url": "./#/atb", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }
