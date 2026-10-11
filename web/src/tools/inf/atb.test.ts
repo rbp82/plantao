@@ -26,7 +26,7 @@ describe('ajuste renal — tela (grupo 10)', () => {
   });
   it('resumo com função renal e doses (base Cockcroft-Gault)', () => {
     const m = computeAtb({ ...PT, basis: 'cg', selected: ['Meropenem', 'Vancomicina'] });
-    expect(m.summary).toBe('Função renal (65 anos, masc., 70 kg, Cr 1,40): Cockcroft-Gault 49,1 mL/min (peso ideal 65,9 kg); CKD-EPI 2021 55,8 mL/min/1,73m². Ajuste por Cockcroft-Gault:\nMeropenem: 1–2 g IV 12/12 h (dose plena)\nVancomicina: Ataque 20–35 mg/kg; 15 mg/kg IV 12–24 h, ajustada por AUC/nível.');
+    expect(m.summary).toBe('Função renal (65 anos, masc., 70 kg, Cr 1,40): Cockcroft-Gault 49,1 mL/min (peso ideal 65,9 kg); CKD-EPI 2021 55,8 mL/min/1,73m². Ajuste por Cockcroft-Gault:\nMeropenem: 1–2 g IV 12/12 h (dose plena)\nVancomicina: Ataque 20–35 mg/kg; 15 mg/kg IV 12–24 h, ajustada por AUC/nível. Infundir em ≥ 60 min e ≤ 10 mg/min (1 g em 1 h, 2 g em 2 h), diluída a 5 mg/mL (máx. 10 mg/mL), em bomba: infusão rápida causa síndrome do homem vermelho e hipotensão.');
   });
   it('cartões seguem a ordem das classes, não a ordem de seleção', () => {
     const m = computeAtb({ ...PT, basis: 'cg', selected: ['Vancomicina', 'Cefepime'] });
@@ -127,6 +127,41 @@ describe('ajuste renal — limites das faixas (grupo 10)', () => {
   it('Colistina: MUI por dose arredondado a 2 casas (ClCr 75: 9 MUI/dia → 4,5 MUI 12/12 h)', () => {
     expect(D('Colistina', 75)).toContain('300 mg CBA/dia (9 MUI/dia) em 2 doses: 150 mg CBA (4,5 MUI) 12/12 h');
     expect(D('Colistina', 60)).toContain('275 mg CBA/dia (8,35 MUI/dia) em 2 doses: 137,5 mg CBA (4,18 MUI) 12/12 h');
+  });
+  /* conferência com os guias HSL e HIAE (10/2026): segurança de infusão e monitorização presentes nos dois guias (ou em um guia + bula) e antes ausentes no app */
+  it('Vancomicina: infusão ≥ 60 min e ≤ 10 mg/min em todas as faixas (HSL 03/2025, HIAE 06/2018, bula Hospira)', () => {
+    [95, 40, 20, 5].forEach((cl) => {
+      expect(D('Vancomicina', cl)).toContain('≥ 60 min e ≤ 10 mg/min');
+      expect(D('Vancomicina', cl)).toContain('5 mg/mL');
+    });
+    expect(D('Vancomicina', 95)).toContain('Ataque 20–35 mg/kg (peso real, máx. 3 g)');
+  });
+  it('Ceftriaxona: máx. 4 g/dia e incompatibilidade com cálcio (HSL 01/2026, HIAE 04/2023)', () => {
+    expect(D('Ceftriaxona', 80)).toContain('Máx. 4 g/dia');
+    expect(D('Ceftriaxona', 80)).toContain('soluções que contêm cálcio');
+  });
+  it('Anfotericina B lipossomal: só SG 5%, infusão 1–2 h (HSL 06/2026, HIAE 06/2024)', () => {
+    expect(D('Anfotericina B lipossomal', 30)).toContain('incompatível com SF 0,9%');
+    expect(D('Anfotericina B lipossomal', 30)).toContain('infundir em 1–2 h');
+  });
+  it('Linezolida: HD após a sessão e hemograma semanal (HSL 03/2017, HIAE 12/2023, bula Zyvox)', () => {
+    expect(D('Linezolida', 10)).toContain('Hemodiálise: dar após a sessão');
+    expect(D('Linezolida', 10)).toContain('Hemograma semanal');
+  });
+  it('Daptomicina: CPK semanal nas duas faixas (HIAE 07/2025, bula Cubicin RF)', () => {
+    expect(D('Daptomicina', 60)).toContain('CPK semanal');
+    expect(D('Daptomicina', 10)).toContain('CPK semanal');
+  });
+  it('Polimixina B: equivalência 1 mg = 10.000 UI e infusão em 1 h; dose do consenso mantida', () => {
+    expect(D('Polimixina B', 50)).toContain('1 mg = 10.000 UI');
+    expect(D('Polimixina B', 50)).toContain('1,25–1,5 mg/kg IV 12/12 h');
+    expect(D('Polimixina B', 50)).toContain('infundir em 1 h');
+  });
+  it('Amicacina: intervalos coincidem com o Manual HIAE (UpToDate): 60 → 24 h, 59,9 → 36 h, 39,9 → 48 h, 19,9 → nível', () => {
+    expect(D('Amicacina', 60)).toContain('15 mg/kg IV 24/24 h');
+    expect(D('Amicacina', 59.9)).toContain('36/36 h');
+    expect(D('Amicacina', 39.9)).toContain('48/48 h');
+    expect(D('Amicacina', 19.9)).toContain('não se aplica');
   });
   it('atbDose devolve classe e rótulo; última faixa é o fallback (ClCr 0)', () => {
     expect(atbDose('Imipenem', 14.9)).toMatchObject({ cls: 'evitar', badge: 'Evitar' });

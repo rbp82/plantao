@@ -41,7 +41,7 @@ function PerfusaoTool({ api, peso }: ToolProps) {
           ['warn', <><b>2ª linha:</b> associar vasopressina (até 0,03 UI/min) quando a nora atinge 0,25–0,5 mcg/kg/min.</>],
           ['warn', <><b>3ª linha:</b> adrenalina se PAM inadequada com nora + vasopressina.</>],
           ['', <><b>Dopamina:</b> não recomendada de rotina; só em casos selecionados (bradicardia, baixo risco de taquiarritmia).</>],
-          ['ok', <><b>Meta PAM ≥ 65 mmHg</b> — considerar 70–80 em HAS prévia ou oligúria refratária.</>],
+          ['ok', <><b>Meta PAM ≥ 65 mmHg</b> (SSC 2021: alvos mais altos não recomendados de rotina — SEPSISPAM, Asfar NEJM 2014). Decisão institucional 11/10/2026: 65 para todos, inclusive HAS prévia; individualizar só pela PAM alvo da ficha do paciente.</>],
         ]} />
       </Section>
       <Ref>Fontes: SSC 2021 — Evans L et al. Crit Care Med 2021;49:e1063 (PMID 34605781): PAM-alvo inicial 65 mmHg (recomendação forte contra alvos mais altos), noradrenalina 1ª linha, vasopressina associada quando a nora está em ~0,25–0,5 mcg/kg/min (VASST: 0,01–0,03 UI/min), adrenalina se PAM inadequada com ambas; dopamina só na indisponibilidade de noradrenalina, com atenção a arritmias. SEPSISPAM — Asfar P et al. NEJM 2014;370:1583 (PMID 24635770): PAM 80–85 não reduziu mortalidade; menos terapia renal substitutiva em hipertensos crônicos (base da nota “70–80 em HAS prévia”, decisão institucional). Lactato {'>'} 2 mmol/L: Sepsis-3 (PMID 26903338). Clearance de lactato ≥ 10%: Jones AE et al. JAMA 2010;303:739 (PMID 20179283). Oligúria {'<'} 0,5 mL/kg/h: ILAS 2018 / KDIGO.</Ref>

@@ -103,6 +103,11 @@ describe('Sedação — faixas e bordas', () => {
   });
   it('BNM: rocurônio 0,45 mg/kg/h na faixa; cisatracúrio 2 mcg/kg/min na faixa; vecurônio sem diluição padrão', () => {
     expect(run(by('roc'), 'rate', 0.45).tag.cls).toBe('ok');
+    /* teto 0,72 mg/kg/h: infusão em UTI 0,48–0,72 (Guia HSL, 30/11/2023) e 10–12 mcg/kg/min (Manual HIAE, 13/07/2023) */
+    expect(by('roc').range).toEqual([0.3, 0.72]);
+    expect(run(by('roc'), 'rate', 0.72).tag.cls).toBe('ok');
+    expect(run(by('roc'), 'rate', 0.73).tag.cls).toBe('crit');
+    expect(run(by('roc'), 'rate', 0.29).tag.cls).toBe('warn');
     expect(run(by('cis'), 'rate', 2).tag.cls).toBe('ok');
     /* 2 mcg/kg/min × 70 × 60 / 2000 mcg/mL = 4,2 mL/h */
     expect(run(by('cis'), 'rate', 2).mlh).toBeCloseTo(4.2, 9);
@@ -113,6 +118,12 @@ describe('Sedação — faixas e bordas', () => {
     /* com 40 mg/40 mL: 7 mL/h × 1 mg/mL / 70 = 0,1 mg/kg/h (limite) */
     const r2 = computeInfusion(vec, 'dose', 7, concOf(40, 'mg', 40), 70);
     expect(!('missing' in r2) && r2.tag.cls).toBe('ok');
+  });
+  it('notas acrescentadas pelos guias HSL/HIAE: dexmedetomidina (hepatopatia, > 24 h) e fentanil (renal/hepática)', () => {
+    expect(by('dex').note).toContain('hepatopatia');
+    expect(by('dex').note).toContain('24 h');
+    expect(by('fen').note).toContain('renal ou hepática');
+    expect(by('roc').note).toContain('0,48–0,72');
   });
   it('dose por kg sem peso → missing peso', () => {
     const r = computeInfusion(by('prop'), 'dose', 30, conc(by('prop')), NaN);

@@ -31,9 +31,28 @@ describe('motor de infusões — dose = conc × vazão ÷ 60 ÷ peso', () => {
     expect(run(by('dopa'), 'dose', 10).tag.txt).toContain('dopaminérgica');
     expect(run(by('dopa'), 'dose', 63).tag.txt).toContain('efeito α');
   });
-  it('nitroglicerina independe do peso: 6 mL/h = 10 mcg/min; 250 mcg/min acima de 200', () => {
+  it('nitroglicerina independe do peso: 6 mL/h = 10 mcg/min; 250 mcg/min acima de 200 (warn); 400 no limite; 450 = crit', () => {
     expect(run(by('ntg'), 'dose', 6).dose).toBeCloseTo(10, 9);
     expect(run(by('ntg'), 'dose', 150).tag.txt).toContain('Acima de 200');
+    expect(run(by('ntg'), 'dose', 150).tag.cls).toBe('warn');
+    /* máximo 400 mcg/min: Guia HSL (02/06/2021) e Manual HIAE (06/08/2024) — 240 mL/h × 100 mcg/mL / 60 = 400 */
+    expect(run(by('ntg'), 'rate', 400).tag.cls).toBe('warn');
+    expect(run(by('ntg'), 'rate', 450).tag).toEqual({ cls: 'crit', txt: 'Acima de 400 mcg/min — dose máxima (HSL/HIAE)' });
+  });
+  it('dopamina: 50 mcg/kg/min sem alerta; 51 = alerta crit de dose máxima (HSL/HIAE); nota de vesicante', () => {
+    expect(run(by('dopa'), 'rate', 50).alerts.length).toBe(0);
+    const r = run(by('dopa'), 'rate', 51);
+    expect(r.alerts.length).toBe(1);
+    expect(r.alerts[0][0]).toBe('crit');
+    expect(r.alerts[0][1]).toContain('50 mcg/kg/min');
+    expect(by('dopa').note).toContain('Vesicante');
+  });
+  it('vesicantes com nota de acesso central: nora, nora concentrada, vasopressina; nitroprussiato em SG 5%; NTG sem PVC', () => {
+    expect(by('nor').note).toContain('acesso venoso central');
+    expect(by('nor').note).toContain('fentolamina');
+    expect(by('vaso').note).toContain('acesso venoso central');
+    expect(by('nitro').note).toContain('SG 5%');
+    expect(by('ntg').note).toContain('PVC');
   });
   it('nitroprussiato 3 mcg/kg/min dispara alerta de cianeto', () => {
     expect(run(by('nitro'), 'dose', 63).alerts.some(([, h]) => h.includes('cianeto'))).toBe(true);

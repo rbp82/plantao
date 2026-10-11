@@ -18,7 +18,7 @@ export function computePerfusao({ pam, lac, lac0, diu, peso: p }: PerfInputs): P
   const parts: string[] = [];
   let oPam: Out | null = null, oLac: Out | null = null, oCl: Out | null = null, oDiu: Out | null = null;
   if (Number.isFinite(pam)) {
-    const [c, s]: [Cls, string] = pam < 65 ? ['crit', 'Baixa — vasopressor'] : pam > 80 ? ['warn', 'Elevada — reavaliar'] : ['ok', 'Adequada'];
+    const [c, s]: [Cls, string] = pam < 65 ? ['crit', 'Baixa — vasopressor'] : pam > 80 ? ['warn', 'Acima da meta de 65 — reavaliar a dose do vasopressor'] : ['ok', 'Adequada'];
     oPam = { value: fmt(pam, 0), unit: 'mmHg', cls: c, status: s }; parts.push(`PAM ${pam} mmHg`);
   }
   if (Number.isFinite(lac)) {

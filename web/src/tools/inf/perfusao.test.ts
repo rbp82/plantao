@@ -37,7 +37,7 @@ describe('metas de perfusão — clearance de lactato e diurese por kg', () => {
     expect(computePerfusao({ ...E, pam: 64 }).pam).toMatchObject({ cls: 'crit', status: 'Baixa — vasopressor' });
     expect(computePerfusao({ ...E, pam: 65 }).pam).toMatchObject({ cls: 'ok', status: 'Adequada' });
     expect(computePerfusao({ ...E, pam: 80 }).pam?.cls).toBe('ok');
-    expect(computePerfusao({ ...E, pam: 81 }).pam).toMatchObject({ cls: 'warn', status: 'Elevada — reavaliar' });
+    expect(computePerfusao({ ...E, pam: 81 }).pam).toMatchObject({ cls: 'warn', status: 'Acima da meta de 65 — reavaliar a dose do vasopressor' });
   });
   it('lactato > 2 = hiperlactatemia; alerta com PAM < 65 e lactato > 2', () => {
     expect(computePerfusao({ ...E, lac: 2 }).lac).toMatchObject({ cls: 'ok', status: 'Normal' });

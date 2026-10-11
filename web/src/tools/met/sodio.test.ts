@@ -72,11 +72,21 @@ describe('Sódio — modelo e bordas', () => {
     expect(t).toContain('Lítio e demeclociclina: não recomendados');
     expect(t).not.toContain('tolvaptana ou demeclociclina');
   });
-  it('limiares da diretriz europeia 2014 e Verbalis 2013 no texto: bolus 150 mL em 20 min até 3×, +5 mEq/L, limite 10–12 (8 se alto risco)', () => {
+  it('limiares da diretriz europeia 2014 e Verbalis 2013 no texto: bolus 150 mL em 20 min até 3×, +5 mEq/L, limite 10 (8 se alto risco) — decisão institucional 11/10/2026 (ESE 2014)', () => {
     const t = txt({ sint: 'grave' });
     expect(t).toContain('Bolus 150 mL IV em 20 min');
     expect(t).toContain('alta de 5 mEq/L');
-    expect(t).toContain('máx. 10–12; 8 se alto risco de desmielinização');
+    expect(t).toContain('máx. 10; 8 se alto risco de desmielinização');
+    expect(t).toContain('10 mEq/L em 24 h');
+    expect(t).toContain('8 mEq/L');
+  });
+  it('preparo do NaCl 3% a partir de NaCl 20% (3,42 mEq/mL; alta vigilância; diluição obrigatória — Manual Farmacêutico HIAE 24/08/2024) só quando a hipertônica é indicada', () => {
+    const t = txt({ sint: 'grave' });
+    expect(t).toContain('3,42 mEq/mL');
+    expect(t).toContain('alta vigilância');
+    expect(t).toContain('padronização da farmácia');
+    expect(txt({ sint: 'leve' })).not.toContain('3,42 mEq/mL');
+    expect(txt({ sint: 'moderado' })).not.toContain('3,42 mEq/mL');
   });
   it('hipernatremia 162 crônica: déficit 6,6 L, meta 152 (−10), SG 5% 2,76 L (115 mL/h), SF 0,45% 5,6 L (233 mL/h)', () => {
     const m = run({ na: 162 });

@@ -85,13 +85,24 @@ export function computeCad(i: CadInputs): CadModel {
   if (k < CAD_K_BAIXO) potassio.push(['crit', '<b>Segurar a insulina.</b> Repor 10 mmol K⁺/h EV até K⁺ > 3,5.']);
   else if (k < CAD_K_ALTO) potassio.push(['info', '<b>20–30 mmol de K⁺ em cada litro</b> de soro para manter K⁺ 4–5.']);
   else potassio.push(['warn', 'K⁺ ≥ 5,0: <b>não repor</b>. Dosar K⁺ 2 h após o início da insulina e a cada 4 h.']);
+  /* Limites de preparo/segurança do KCl 19,1% (2,56 mEq/mL; ampola 10 mL = 25,6 mEq) — conferidos em 11/10/2026 (docs/auditoria-2026-10/6c-…):
+     Guia Farmacêutico HSL (16/04/2026): "SOMENTE … APÓS DILUIÇÃO", vesicante; concentração máxima periférica 10 mEq/100 mL, central 20–40 mEq/100 mL;
+     velocidade máxima periférica 10 mEq/h, central 40 mEq/h. Manual Farmacêutico HIAE (24/08/2024): alta vigilância (MAVi), urgência "até 20 mEq/hora",
+     monitorização cardíaca; assistolia/FV com administração rápida. Não altera a dose do consenso 2024 (20–30 mmol/L; 10 mmol/h): 20–30 mmol ÷ 2,56 = 7,8–11,7 mL. */
+  if (k < CAD_K_ALTO) potassio.push(['warn', '<b>KCl 19,1%</b> (2,56 mEq/mL; ampola 10 mL = 25,6 mEq; 20–30 mmol ≈ 8–12 mL por litro): alta vigilância, vesicante — <b>sempre diluído, nunca em bolus</b>. Veia periférica: ≤ 10 mEq/100 mL e ≤ 10 mEq/h; acima disso só por acesso central com monitorização cardíaca contínua (Guia HSL 16/04/2026: até 40 mEq/h; Manual HIAE 24/08/2024: até 20 mEq/h).']);
 
   const insulina: Item[] = [];
   let insTxt = '';
   if (k < CAD_K_BAIXO) { insulina.push(['crit', '<b>Insulina suspensa</b> até K⁺ > 3,5 mEq/L.']); insTxt = 'insulina suspensa (K < 3,5)'; }
   else if (via === 'iv') {
-    insulina.push(['info', `<b>Infusão ${r1(peso * 0.1)} U/h</b> de insulina regular EV (0,1 U/kg/h, taxa fixa).`]);
+    insulina.push(['info', `<b>Infusão ${r1(peso * 0.1)} U/h</b> de insulina regular EV (0,1 U/kg/h, taxa fixa) — a 1 U/mL, ${r1(peso * 0.1)} mL/h.`]);
     insulina.push(['', `Bolus ${r1(peso * 0.1)} U (0,1 U/kg) IV ou IM só se houver atraso no acesso venoso.`]);
+    /* Preparo — Guia Farmacêutico HSL, Insulina regular humana (27/01/2026): "diluir cada 100 UI em 100 mL de SF 0,9% sem PVC (equipo e soro)", concentração
+       máxima 1 U/mL, alta vigilância; contraindicação: hipoglicemia. Manual Farmacêutico HIAE, Insulina humana regular (16/02/2026): MAVi, diluir em SF e
+       administrar em bomba de infusão, preparo por 2 profissionais, equipo convencional (com PVC) desprezando 20 mL para saturar, estabilidade 24 h.
+       Os guias divergem na estratégia contra adsorção (sem PVC vs. saturar o equipo) → remete à padronização local. A dose de CAD do HSL (0,14 U/kg/h,
+       ajuste 0,02–0,05, meta 150–200 = ADA 2009) NÃO foi adotada: prevalece o consenso 2024 (0,1 U/kg/h). Hipocalemia como contraindicação não consta nos guias. */
+    insulina.push(['warn', '<b>Preparo (alta vigilância, dupla checagem):</b> insulina regular 100 U em 100 mL de SF 0,9% (1 U/mL, concentração máxima) em bomba de infusão; estável por 24 h. Adsorção ao plástico: o HSL usa soro e equipo sem PVC; o HIAE usa equipo convencional e despreza 20 mL da solução para saturá-lo — seguir a padronização da farmácia (Guia HSL 27/01/2026; Manual HIAE 16/02/2026).']);
     insTxt = `insulina regular EV ${r1(peso * 0.1)} U/h (bolus ${r1(peso * 0.1)} U se atraso no acesso)`;
   } else {
     insulina.push(['info', `<b>${r1(peso * 0.3)} U</b> de análogo rápido SC agora (0,3 U/kg — ADA 2009; o consenso 2024 só fixa o intervalo de 1–2 h, em CAD leve/moderada não complicada).`]);
@@ -109,9 +120,15 @@ export function computeCad(i: CadInputs): CadModel {
     insulina.push(['ok', `Virgem de insulina: 0,5–0,6 U/kg/dia (≈ ${f0(peso * 0.5)}–${f0(peso * 0.6)} U/dia, divididas); ~0,3 U/kg/dia (≈ ${f0(peso * 0.3)} U) se doença renal ou fragilidade.`]);
   }
 
+  /* Preparo/segurança do NaHCO₃ 8,4% (1 mEq/mL) — conferido em 11/10/2026. Guia Farmacêutico HSL (25/07/2018): diluir (puro só em PCR); infusão em acidose
+     metabólica 2–8 h, taxa máxima 1 mEq/kg/h; vesicante — adulto em veia periférica só até 10 mL por 50 mL de diluente (10 mEq/60 mL ≈ 167 mEq/L = 1,4%, isotônico).
+     Manual Farmacêutico HIAE (25/06/2021): extravasamento → necrose tecidual; não administrar catecolaminas no mesmo cateter (inativação); monitorar pH/gasometria.
+     A solução do consenso 2024/ADA 2009 (100 mmol em 400 mL de água = 100 mL + 400 mL = 200 mEq/L) fica acima do limite periférico do HSL (12,5 mL/50 mL):
+     a nota sugere acesso central ou 500 mL de água (= 1,4%). Tempo mínimo = max(2 h, 100 mmol ÷ peso) pela taxa máxima do HSL. Dose do consenso mantida. */
   const bicarbonato: Item[] = ph < CAD_PH_BIC ? [
     ['crit', '<b>Considerar (pH < 7,0).</b>'],
     ['info', '<b>100 mmol de NaHCO₃ 8,4%</b> em 400 mL de água (isotônico), a cada 2 h até pH > 7,0 (ADA 2009 acrescentava 20 mEq de KCl).'],
+    ['warn', `<b>Preparo:</b> 8,4% = 1 mEq/mL (100 mmol = 100 mL). Infundir em ≥ ${f1(Math.max(2, 100 / peso))} h (Guia HSL: acidose metabólica em 2–8 h, máx. 1 mEq/kg/h). Vesicante: em veia periférica ≤ 10 mL de 8,4% por 50 mL de diluente — 100 mmol em 400 mL (200 mEq/L) excede um pouco esse limite: preferir acesso central ou 500 mL de água (1,4%, isotônico). Não infundir na mesma via de catecolaminas (inativação). Guia HSL 25/07/2018; Manual HIAE 25/06/2021.`],
     ['warn', 'Risco: hipocalemia, edema cerebral, acidose paradoxal do SNC. Dosar K⁺ a cada 2 h.'],
   ] : [['ok', 'pH ≥ 7,0 — <b>não indicado</b> (uso de rotina não recomendado).']];
 

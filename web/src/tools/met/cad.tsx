@@ -58,7 +58,8 @@ function CadTool({ api, peso }: ToolProps) {
           <Block title="Monitorização" items={m.monitorizacao} />
         </>
       )}
-      <Ref>Umpierrez GE et al. Hyperglycemic Crises in Adults With Diabetes: A Consensus Report (ADA/EASD/JBDS/AACE/DTS). Diabetes Care 2024;47(8):1257–1275 — PMID 39052901 — doi:10.2337/dci24-0032 (critérios diagnósticos, gravidade, fluidos, insulina 0,1 U/kg/h, K⁺ 3,5/5,0, bicarbonato pH &lt; 7,0, resolução, transição). Itens marcados "ADA 2009": Kitabchi AE et al. Diabetes Care 2009;32(7):1335–1343 — PMID 19564476 — doi:10.2337/dc09-9032. Na⁺ corrigido: +1,6 mEq/L por 100 mg/dL de glicose acima de 100 (ambos).</Ref>
+      <Ref>Umpierrez GE et al. Hyperglycemic Crises in Adults With Diabetes: A Consensus Report (ADA/EASD/JBDS/AACE/DTS). Diabetes Care 2024;47(8):1257–1275 — PMID 39052901 — doi:10.2337/dci24-0032 (critérios diagnósticos, gravidade, fluidos, insulina 0,1 U/kg/h, K⁺ 3,5/5,0, bicarbonato pH &lt; 7,0, resolução, transição). Itens marcados "ADA 2009": Kitabchi AE et al. Diabetes Care 2009;32(7):1335–1343 — PMID 19564476 — doi:10.2337/dc09-9032. Na⁺ corrigido: +1,6 mEq/L por 100 mg/dL de glicose acima de 100 (ambos).
+        <br />Conferido com o Guia Farmacêutico do Hospital Sírio-Libanês e o Manual Farmacêutico do Hospital Israelita Albert Einstein (monografias públicas, 11/10/2026): preparo da insulina regular EV (100 U/100 mL SF = 1 U/mL; HSL 27/01/2026, HIAE 16/02/2026), limites de concentração e velocidade do KCl 19,1% (HSL 16/04/2026, HIAE 24/08/2024) e diluição/velocidade do NaHCO₃ 8,4% (HSL 25/07/2018, HIAE 25/06/2021). O esquema de insulina do Guia HSL (0,14 U/kg/h, meta 150–200 — ADA 2009) não foi adotado: prevalece o consenso 2024.</Ref>
     </div>
   );
 }

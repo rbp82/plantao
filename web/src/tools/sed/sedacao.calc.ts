@@ -41,7 +41,8 @@ export const SED: Drug[] = [
         : d <= 1.5 ? { cls: 'warn', txt: 'Acima de 0,7 (descrito até 1,5)' }
         : { cls: 'crit', txt: 'Acima de 1,5 mcg/kg/h' };
     },
-    note: 'Manutenção 0,2–0,7 mcg/kg/h (até 1,5 conforme tolerância). Não deprime o drive respiratório. Monitorar bradicardia e hipotensão.',
+    /* Redução em hepatopatia e tolerância/abstinência após > 24 h: Guia HSL (dexmedetomidina, 27/01/2026) e Manual HIAE (dexmedetomidina, 14/01/2025) */
+    note: 'Manutenção 0,2–0,7 mcg/kg/h (até 1,5 conforme tolerância). Não deprime o drive respiratório. Monitorar bradicardia e hipotensão. Reduzir a dose em hepatopatia; uso > 24 h: tolerância e abstinência na retirada.',
   },
   {
     id: 'ket', name: 'Cetamina', sub: 'Antagonista NMDA', amt: 50, amtU: 'mg', vol: 100,
@@ -61,7 +62,8 @@ export const OPI: Drug[] = [
   {
     id: 'fen', name: 'Fentanil', sub: 'Opioide sintético', amt: 5000, amtU: 'mcg', vol: 100,
     dose: 'mcg/kg/h', range: [0.7, 10], alt: ['mcg/h'],
-    note: 'Infusão 0,7–10 mcg/kg/h; bolus 0,35–0,5 mcg/kg a cada 0,5–1 h. Meia-vida contexto-dependente.',
+    /* Cautela/redução em disfunção renal e hepática: Guia HSL (fentanila, 18/01/2022: 75% se ClCr 10–50, 50% se < 10) e Manual HIAE (fentanila, 23/08/2024) */
+    note: 'Infusão 0,7–10 mcg/kg/h; bolus 0,35–0,5 mcg/kg a cada 0,5–1 h. Meia-vida contexto-dependente. Disfunção renal ou hepática: cautela, reduzir a dose.',
   },
   {
     id: 'mor', name: 'Morfina', sub: 'Metabólito ativo M6G · independe do peso', amt: 50, amtU: 'mg', vol: 50,
@@ -90,8 +92,10 @@ export const OPI: Drug[] = [
 export const BNM: Drug[] = [
   {
     id: 'roc', name: 'Rocurônio', sub: 'BNM não despolarizante', amt: 250, amtU: 'mg', vol: 135,
-    dose: 'mg/kg/h', range: [0.3, 0.6], alt: ['mg/h'],
-    note: 'Intubação 0,6–1,2 mg/kg em bolus. Reversão: sugamadex.',
+    /* Teto 0,6 → 0,72 mg/kg/h: infusão em UTI 0,48–0,72 mg/kg/h no Guia HSL (rocurônio, 30/11/2023) e 10–12 mcg/kg/min (= 0,6–0,72) no Manual HIAE (rocurônio, 13/07/2023);
+       dentro dos ensaios da bula (4–16 mcg/kg/min). Piso 0,3 = faixa do HSL para disfunção renal/hepática (0,3–0,4). */
+    dose: 'mg/kg/h', range: [0.3, 0.72], alt: ['mg/h'],
+    note: 'Intubação 0,6–1,2 mg/kg em bolus. Infusão em UTI 0,48–0,72 mg/kg/h (HSL; HIAE 10–12 mcg/kg/min); disfunção renal/hepática 0,3–0,4 mg/kg/h; titular pelo TOF. Reversão: sugamadex.',
   },
   {
     id: 'cis', name: 'Cisatracúrio', sub: 'Eliminação de Hofmann', amt: 200, amtU: 'mg', vol: 100,

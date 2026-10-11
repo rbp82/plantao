@@ -69,11 +69,14 @@ Nenhuma divergência numérica. Todas as doses, tempos e metas pós-RCE conferid
 
 ## Decisões institucionais a confirmar
 As escolhas entre fontes aceitáveis não foram alteradas e estão listadas em cada relatório. As de maior impacto:
-- Meta de PAM 70–80 mmHg em hipertensos crônicos (SSC 2021 recomenda 65; SEPSISPAM); Hb alvo 8–9 (SSC: 7 com exceções).
+- ~~Meta de PAM 70–80 mmHg em hipertensos crônicos~~ → **DECIDIDO (11/10/2026): PAM alvo 65 mmHg para todos** (SSC 2021; SEPSISPAM, Asfar P et al., NEJM 2014), individualizável só pela PAM alvo da ficha do paciente. Hb alvo 8–9 (SSC: 7 com exceções) segue em aberto.
 - Esquemas empíricos de PAC moderada-grave (pip-tazo + azitromicina) e PAV "precoce" (ATS/IDSA 2019 e IDSA 2016 preferem outros esquemas) — validar com a CCIH.
-- Teto de correção do sódio 10–12 mEq/L/24 h (Verbalis 2013) vs 10 (ESE 2014) — sugestão: adotar 10, 8 em alto risco.
+- ~~Teto de correção do sódio 10–12 mEq/L/24 h~~ → **DECIDIDO (11/10/2026): teto 10 mEq/L em 24 h, 8 em alto risco de desmielinização** (ESE 2014, Spasovski; Sterns & Rondon-Berrios 2025), aplicado em `sodio.calc.ts`.
 - Vasopressina até 0,04 UI/min (bula até 0,07; SSC 0,03 fixo); propofol crítico em 4 mg/kg/h; sufentanil 10× vs 7,5× o fentanil.
 - Tabela de ajuste renal de antimicrobianos: conferida contra as bulas; **assinatura da farmácia clínica** antes do uso assistencial continua recomendada.
 
 ## Itens em aberto
 Textos integrais não acessíveis para verificação número a número: LaFarge 1970 (via Reiter 2023), Winter 1967, Katz 1973, Fig. 1 de Ferreira 2001 (mortalidade por faixa de SOFA, sustentada pelo texto "≤ 9 → < 33 %" e "> 11 → 95 %"), faixas R/K/α/MA do fabricante do TEG (Scarpelini 2009 anotado). Não implementados: critério S/F ≤ 315 da definição global de SDRA 2024 e correção automática da pressão barométrica.
+
+## Revisão cruzada com guias institucionais (11/10/2026)
+As monografias públicas do Guia Farmacêutico do Hospital Sírio-Libanês (guiafarmaceutico.hsl.org.br) e do Manual Farmacêutico do Hospital Israelita Albert Einstein (aplicacoes.einstein.br/manualfarmaceutico) foram baixadas para 52 fármacos do app e comparadas número a número: [6a vasoativas e sedação](6a-guias-hsl-einstein-vasoativas-sedacao.md), [6b antimicrobianos](6b-guias-hsl-einstein-antimicrobianos.md), [6c eletrólitos e insulina](6c-guias-hsl-einstein-eletrolitos-insulina.md).

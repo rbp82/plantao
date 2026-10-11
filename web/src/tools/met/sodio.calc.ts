@@ -4,7 +4,7 @@
    (PMID 10816188) — ACT, ΔNa por litro, déficit de água livre · Spasovski G et al. Clinical practice guideline on diagnosis and treatment
    of hyponatraemia. Eur J Endocrinol 2014;170:G1 (PMID 24569125) — classificação leve/moderada/profunda, 150 mL de NaCl 3% em 20 min
    (até 3×, meta +5 mmol/L), limite de 10 mmol/L nas primeiras 24 h e 8 mmol/L/24 h depois · Verbalis JG et al. Am J Med 2013;126:S1
-   (PMID 24074529) — meta 4–8 mEq/L/24 h, limite 10–12 (8 com alto risco de desmielinização) · Hillier TA et al. Am J Med 1999;106:399
+   (PMID 24074529) — meta 4–8 mEq/L/24 h; limite 10–12 no painel dos EUA. DECISÃO INSTITUCIONAL (11/10/2026): teto de 10 mEq/L em 24 h (ESE 2014) e 8 com alto risco de desmielinização · Hillier TA et al. Am J Med 1999;106:399
    (PMID 10225241) — Na⁺ corrigido pela glicemia (2,4 por 100 mg/dL). */
 import { C, type Cls } from '@/lib/calc';
 
@@ -80,7 +80,7 @@ export function computeSodio(i: SodioInputs): SodioModel {
     const usa3 = sint === 'grave' || (sint === 'moderado' && aguda);
     const verdict: VerdictM = {
       cls: nae < 125 ? 'crit' : 'warn', kicker: 'Hiponatremia ' + grau, title: `Na⁺ ${f1(nae)} mEq/L`,
-      desc: `Meta: ${f1(alvo)} mEq/L em 24 h · ${aguda ? 'aguda: elevar 4–6 mEq/L rapidamente se sintomática' : 'crônica: elevar 4–8 mEq/L em 24 h (máx. 10–12; 8 se alto risco de desmielinização)'}`,
+      desc: `Meta: ${f1(alvo)} mEq/L em 24 h · ${aguda ? 'aguda: elevar 4–6 mEq/L rapidamente se sintomática' : 'crônica: elevar 4–8 mEq/L em 24 h (máx. 10; 8 se alto risco de desmielinização)'}`,
     };
     const readouts: ReadoutM[] = [
       { label: 'Água corporal total', value: f1(tbw), unit: 'L' },
@@ -88,14 +88,18 @@ export function computeSodio(i: SodioInputs): SodioModel {
     ];
     if (usa3) readouts.push({ label: 'NaCl 3% · manutenção para a meta', value: f0(t3), unit: 'mL/h', cls: 'crit', big: true, span2: true, status: `${f0(v3)} mL em 24 h → ${f1(alvo)} mEq/L (sem contar perdas)` });
     let conduta: Item[];
-    if (usa3) conduta = [['crit', '<b>NaCl 3% indicado.</b>'], ['crit', '<b>Bolus 150 mL IV em 20 min</b> — repetir até 3× (checando Na⁺ entre os bolus) até melhora ou alta de 5 mEq/L.'], ['info', `Depois, se necessário, ~${f0(t3)} mL/h até a meta.`], ['warn', 'Dosar Na⁺ a cada 2 h nas primeiras horas.']];
+    /* Preparo/segurança — Manual Farmacêutico HIAE, monografia Cloreto de sódio 20% injetável (atualizada 24/08/2024): 3,42 mEq de Na⁺/mL (ampola 10 mL = 34,2 mEq),
+       medicamento de alta vigilância (MAVi), "obrigatório diluir antes da administração", administrar em veia para evitar transvasamento; monitorar Na⁺, K⁺ e HCO₃⁻.
+       O Guia Farmacêutico HSL só publica a monografia nasal (27/02/2017) — sem dado injetável. Nenhum dos guias traz receita de NaCl 3%: segue a padronização da farmácia.
+       Conferido em 11/10/2026 (docs/auditoria-2026-10/6c-guias-hsl-einstein-eletrolitos-insulina.md). Não altera dose nem fórmula (ESE 2014). */
+    if (usa3) conduta = [['crit', '<b>NaCl 3% indicado.</b>'], ['crit', '<b>Bolus 150 mL IV em 20 min</b> — repetir até 3× (checando Na⁺ entre os bolus) até melhora ou alta de 5 mEq/L.'], ['info', `Depois, se necessário, ~${f0(t3)} mL/h até a meta.`], ['warn', '<b>Preparo (alta vigilância):</b> NaCl 3% (513 mEq/L) é preparado a partir de NaCl 20% (ampola 10 mL = 34,2 mEq; 3,42 mEq/mL), obrigatoriamente diluído, conforme a padronização da farmácia; infundir em veia calibrosa para evitar extravasamento (Manual Farmacêutico HIAE, 24/08/2024).'], ['warn', 'Dosar Na⁺ a cada 2 h nas primeiras horas.']];
     else if (vol === 'hipo') conduta = [['info', 'SF 0,9% para restaurar a volemia.'], ['', 'Corrigir a causa (vômitos, diarreia, diurético).'], ['warn', 'Sem melhora após expansão → reavaliar etiologia.']];
     /* SIADH refratário — diretriz europeia 2014 (Spasovski, PMID 24569125): 2ª linha ureia VO 0,25–0,5 g/kg/dia ou diurético de alça em dose baixa + NaCl VO (2D);
        contra lítio e demeclociclina (1D); contra vaptanos em hiponatremia moderada/profunda (1C). O painel dos EUA (Verbalis 2013) aceita tolvaptana → decisão institucional. */
     else if (vol === 'eu') conduta = [['info', 'Restrição hídrica: 500–800 mL/dia abaixo da diurese.'], ['', 'Investigar SIADH: TSH, cortisol, osmolalidade urinária.'], ['', 'Refratário: 2ª linha ureia VO 0,25–0,5 g/kg/dia ou furosemida em dose baixa + NaCl VO (diretriz europeia 2014). Tolvaptana só por protocolo local (europeia 2014 contra em moderada/profunda; painel EUA 2013 a favor). <b>Lítio e demeclociclina: não recomendados.</b>']];
     else conduta = [['info', 'Restrição hídrica e de sódio.'], ['info', 'Furosemida para balanço negativo.'], ['', 'Tratar a causa (ICC, cirrose, síndrome nefrótica).']];
     const mielinolise: Item[] = [
-      ['crit', 'Não ultrapassar <b>10–12 mEq/L em 24 h</b> (forma crônica).'],
+      ['crit', 'Não ultrapassar <b>10 mEq/L em 24 h</b> (forma crônica; <b>8 mEq/L</b> em alto risco de desmielinização: desnutrição, etilismo, hipocalemia, Na⁺ ≤ 105). ESE 2014 (Spasovski, PMID 24569125); Sterns & Rondon-Berrios 2025 (PMID 41093163).'],
       ['warn', 'Correção excessiva: SG 5% + desmopressina 2–4 mcg IV.'],
       ['warn', 'Risco maior: desnutrição, etilismo, hipocalemia (K⁺ < 3,5).'],
       ['info', 'Dosar Na⁺ a cada 4–6 h durante a correção.'],

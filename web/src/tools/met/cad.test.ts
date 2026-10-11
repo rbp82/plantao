@@ -98,6 +98,27 @@ describe('CAD — modelo e bordas', () => {
     expect(txt()).toContain('β-hidroxibutirato < 0,6 mmol/L');
     expect(txt()).toContain('Não usar o ânion gap como critério de resolução');
   });
+  it('conferência com os guias HSL (KCl 16/04/2026; NaHCO₃ 25/07/2018; insulina 27/01/2026) e HIAE (KCl 24/08/2024; NaHCO₃ 25/06/2021; insulina 16/02/2026): preparo 1 U/mL, limites do KCl e do bicarbonato', () => {
+    const t = txt();
+    expect(t).toContain('Infusão 7,0 U/h');
+    expect(t).toContain('a 1 U/mL, 7,0 mL/h');
+    expect(t).toContain('100 U em 100 mL de SF 0,9% (1 U/mL');
+    expect(t).toContain('sempre diluído, nunca em bolus');
+    expect(t).toContain('≤ 10 mEq/100 mL e ≤ 10 mEq/h');
+    expect(t).toContain('2,56 mEq/mL');
+    expect(txt({ k: 5.2 })).not.toContain('2,56 mEq/mL');             /* K ≥ 5,0: não repõe → sem nota de KCl */
+    expect(txt({ k: 3.1 })).toContain('2,56 mEq/mL');                 /* 10 mmol/h ainda é KCl diluído */
+    expect(txt({ k: 3.1 })).not.toContain('1 U/mL');                  /* insulina suspensa → sem nota de preparo */
+    expect(txt({ via: 'sc' })).not.toContain('1 U/mL');
+    expect(txt()).not.toContain('catecolaminas');                     /* pH 7,28: sem bicarbonato */
+    const b = txt({ hc: 9, ph: 6.9 });
+    expect(b).toContain('8,4% = 1 mEq/mL');
+    expect(b).toContain('Infundir em ≥ 2,0 h');                       /* 70 kg: 100 ÷ 70 = 1,4 h < 2 h */
+    expect(b).toContain('máx. 1 mEq/kg/h');
+    expect(b).toContain('catecolaminas');
+    expect(txt({ hc: 9, ph: 6.9, peso: 40 })).toContain('Infundir em ≥ 2,5 h'); /* 40 kg: 100 ÷ 40 = 2,5 h */
+    expect(computeCad(base).summary).not.toContain('1 U/mL');         /* resumo de prontuário inalterado */
+  });
   it('resumo para prontuário', () => {
     expect(computeCad(base).summary).toBe('CAD leve (glicemia 450, pH 7,28, HCO₃ 16,0, K 4,2, Na 132 / corrigido 137,6). Peso 70 kg. Hidratação: SF 0,9% ou balanceado 500–1000 mL/h nas primeiras 2–4 h, depois corrigir o déficit em 24–48 h guiado por PA, FC, balanço e Na (SF 0,45% só se a osmolalidade não cair). K: 20–30 mmol/L de soro. Insulina: insulina regular EV 7,0 U/h (bolus 7,0 U se atraso no acesso). Bicarbonato: não indicado.');
     expect(computeCad({ ...base, ph: 6.85, k: 3.1, diu: 'nao', vol: 'choque' }).summary).toContain('K: repor 10 mmol/h, insulina suspensa (aguardar diurese). Insulina: insulina suspensa (K < 3,5). Bicarbonato: considerar (100 mmol a cada 2 h até pH > 7,0).');
