@@ -7,6 +7,7 @@ import { C } from '@/lib/calc';
 import { useStore, useVaultState, applyTheme, type Theme, bump } from '@/lib/store';
 import { useActivePatient, patientSummary } from '@/lib/patients';
 import { allTools, GROUPS, GROUP_ORDER, toolHref, type Tool, type Group } from '@/tools/registry';
+import { TopBar } from '@/components/Shell';
 import { toast } from '@heroui/react';
 
 export const Tile = ({ t, size = 44 }: { t: Tool; size?: number }) => (
@@ -78,16 +79,13 @@ export function Home() {
 
   return (
     <main className="mx-auto w-full max-w-3xl pb-28">
-      <header className="safe-top flex items-start gap-1 px-5 pb-2 pt-6">
-        <div className="flex-1">
-          <h1 className="text-[32px] font-semibold leading-none tracking-tight">Plantão</h1>
-          <p className="mt-1.5 text-[14px] text-muted">UTI e emergência</p>
-        </div>
+      {/* mesma barra superior das outras abas (sem "voltar"): só o conteúdo muda ao trocar de aba */}
+      <TopBar root kicker="UTI e emergência" title="Plantão" right={<>
         <Button variant="ghost" isIconOnly aria-label="Bloquear agora" className="size-11 rounded-xl" onPress={() => C.Vault.lock().then(() => { bump(); toast('Bloqueado'); })}><LockKeyhole className="size-5" /></Button>
         <Button variant="ghost" isIconOnly aria-label="Tema" className="size-11 rounded-xl" onPress={cycleTheme}><ThemeIcon className="size-5" /></Button>
-      </header>
+      </>} />
 
-      <div className="sticky top-0 z-10 bg-background/90 px-4 pb-2 pt-2 backdrop-blur-md">
+      <div className="sticky top-14 z-10 bg-background/90 px-4 pb-2 pt-2 backdrop-blur-md">
         <SearchField value={q} onChange={setQ} aria-label="Buscar calculadora ou protocolo" fullWidth>
           <SearchField.Group className="h-12 rounded-2xl">
             <SearchField.SearchIcon />

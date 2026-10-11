@@ -54,7 +54,7 @@ export function Board({ query }: { query: URLSearchParams }) {
 
   return (
     <>
-      <TopBar kicker={tool ? 'Escolha o paciente para' : 'Lista do plantão'} title={tool ? tool.title : 'Leitos'}
+      <TopBar root={!tool} kicker={tool ? 'Escolha o paciente para' : 'Lista do plantão'} title={tool ? tool.title : 'Leitos'}
         right={<Button variant="ghost" isIconOnly aria-label="Admitir paciente" className="size-11 rounded-xl" onPress={() => navigate(fichaHref)}><UserPlus className="size-5" /></Button>} />
       <Page>
         {vault.temp && <Note cls="warn">Modo temporário: a lista some ao bloquear ou fechar o app.</Note>}

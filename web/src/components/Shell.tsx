@@ -5,15 +5,20 @@ import { ChevronLeft, Calculator, BookOpenText, BedDouble, HeartPulse } from 'lu
 import { useRoute } from '@/lib/router';
 import { useStore } from '@/lib/store';
 
-export function TopBar({ kicker, title, right }: { kicker?: ReactNode; title: ReactNode; right?: ReactNode }) {
+/* Barra superior, igual em todas as telas: mesma altura, título no mesmo lugar, ações à direita.
+   `root` = tela de uma aba da barra inferior (Calcular, Protocolos, Leitos, PCR): sem botão "voltar",
+   porque as abas são irmãs; as telas abertas a partir delas (calculadora, protocolo, paciente…) têm o "voltar". */
+export function TopBar({ kicker, title, right, root }: { kicker?: ReactNode; title: ReactNode; right?: ReactNode; root?: boolean }) {
   /* título da aba acompanha a tela (as telas com título dinâmico sobrescrevem depois) */
-  useEffect(() => { if (typeof title === 'string') document.title = `${title} — Plantão`; }, [title]);
+  useEffect(() => { if (typeof title === 'string') document.title = title === 'Plantão' ? 'Plantão' : `${title} — Plantão`; }, [title]);
   return (
     <header className="safe-top sticky top-0 z-20 border-b border-separator bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-3xl items-center gap-1 px-2">
-        <Button variant="ghost" isIconOnly aria-label="Voltar" className="size-11 rounded-xl" onPress={() => history.length > 1 ? history.back() : (location.hash = '#/')}>
-          <ChevronLeft className="size-6" />
-        </Button>
+      <div className={`mx-auto flex h-14 max-w-3xl items-center gap-1 ${root ? 'pl-4 pr-2' : 'px-2'}`}>
+        {!root && (
+          <Button variant="ghost" isIconOnly aria-label="Voltar" className="size-11 rounded-xl" onPress={() => history.length > 1 ? history.back() : (location.hash = '#/')}>
+            <ChevronLeft className="size-6" />
+          </Button>
+        )}
         <div className="min-w-0 flex-1 px-1">
           {kicker && <div className="truncate font-mono text-[10.5px] uppercase tracking-wider text-muted">{kicker}</div>}
           <h1 className="truncate text-[17px] font-semibold leading-tight tracking-tight">{title}</h1>

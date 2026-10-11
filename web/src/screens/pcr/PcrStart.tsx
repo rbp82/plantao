@@ -26,7 +26,7 @@ export function PcrStart() {
   };
   return (
     <>
-      <TopBar kicker="ACLS adulto · AHA 2025" title="Parada cardiorrespiratória" />
+      <TopBar root kicker="ACLS adulto · AHA 2025" title="Parada cardiorrespiratória" />
       <Page>
         <button type="button" onClick={start} className="flex min-h-24 w-full items-center gap-4 rounded-2xl bg-danger px-5 py-4 text-left text-danger-foreground shadow-lg active:opacity-90">
           <HeartPulse className="size-10 shrink-0" strokeWidth={2.2} />

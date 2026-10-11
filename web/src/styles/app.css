@@ -87,7 +87,9 @@
   --color-g-hema: oklch(0.5 0.15 350);
 }
 
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* scrollbar-gutter: a largura da janela não muda quando uma tela cabe sem rolagem e a seguinte não —
+   sem isso a barra inferior fixa (centralizada) deslocava alguns pixels ao trocar de aba no desktop */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scrollbar-gutter: stable; }
 body {
   @apply bg-background text-foreground font-sans antialiased;
   min-height: 100dvh;

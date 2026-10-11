@@ -67,7 +67,7 @@ export function Protocols({ query }: { query: URLSearchParams }) {
   }, [idx, words, tick]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <>
-      <TopBar kicker="Do repositório da instituição" title="Protocolos" right={<Button variant="ghost" isIconOnly aria-label="Atualizar" className="size-11 rounded-xl" onPress={() => load(true)}><RefreshCw className={`size-5 ${loading ? 'animate-spin' : ''}`} /></Button>} />
+      <TopBar root kicker="Do repositório da instituição" title="Protocolos" right={<Button variant="ghost" isIconOnly aria-label="Atualizar" className="size-11 rounded-xl" onPress={() => load(true)}><RefreshCw className={`size-5 ${loading ? 'animate-spin' : ''}`} /></Button>} />
       <Page>
         <SearchField value={q} onChange={setQ} aria-label="Buscar protocolo" fullWidth>
           <SearchField.Group className="h-12 rounded-2xl"><SearchField.SearchIcon /><SearchField.Input placeholder="Buscar protocolo ou termo…" className="text-[16px]" /><SearchField.ClearButton /></SearchField.Group>
