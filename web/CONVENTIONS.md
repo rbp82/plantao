@@ -4,24 +4,24 @@ App React 19 + Vite 8 + Tailwind v4 + HeroUI v3 (`@heroui/react`). Os componente
 
 ## Comandos (Windows; a política do PowerShell bloqueia `npx.ps1`, por isso `cmd /c npx.cmd`)
 Rode a partir de `web/`:
-- Testes: `cmd /c "npx.cmd vitest run"` (ou um arquivo: `cmd /c "npx.cmd vitest run src/tools/inf"`). Inclui `src/legacy/suite.test.ts` (bateria do app anterior) e `parity.test.ts` (src/legacy ↔ ../assets/js idênticos: ao corrigir um motor, copie para os dois lugares).
+- Testes: `cmd /c "npx.cmd vitest run"` (ou um arquivo: `cmd /c "npx.cmd vitest run src/tools/inf"`).
 - Tipos: `cmd /c "npx.cmd tsc --noEmit"`
 - Build: `cmd /c "npx.cmd vite build"`
 Um servidor de desenvolvimento pode já estar rodando em http://localhost:5173/plantao/ (não inicie outro).
 
 ## Onde fica cada coisa
-- `src/legacy/core.js`, `src/legacy/engine.js`: motores auditados do app anterior, carregados como efeito colateral e expostos em `window.Calc` (ponte tipada em `src/lib/calc.ts` → `import { C, num, fmt, fmtDose, fmtN, isNum, r9 } from '@/lib/calc'`). Funções úteis: `C.num`, `C.fmt(n, casas)`, `C.fmtDose`, `C.fmtN`, `C.rangeTag(v, lo, hi)`, `C.fio2`, `C.berlin`, `C.renal.*`, `C.infMath.*`, `C.LIM` (limites de plausibilidade por campo do paciente), `C.engine` (gasometria/hemodinâmica/ventilação: `C.engine.compute(inputs, cfg, {})`, `C.engine.REF`, `C.engine.fmt`), `C.gasF.F` (definições de campos do engine).
-- Código-fonte das calculadoras antigas (a referência do que portar): `../assets/js/tools/{inf,sed,met,hema,delta}.js` e `../assets/js/core.js`. Testes antigos com valores esperados calculados à mão: `../tests/tests.js`. Fontes clínicas: `../AUDITORIA.md`.
+- Lógica clínica auditada em TypeScript: `src/lib/core/` (num, renal, infMath, vault, patients), `src/lib/engine.ts` (gasometria), `src/lib/scan.ts` (foto), `src/lib/beds.ts`, `src/lib/pcr.ts`. O agregador `src/lib/calc.ts` exporta `C` (`import { C, num, fmt, fmtDose, fmtN, isNum, r9 } from '@/lib/calc'`). Funções úteis: `C.num`, `C.fmt(n, casas)`, `C.fmtDose`, `C.fmtN`, `C.rangeTag(v, lo, hi)`, `C.fio2`, `C.berlin`, `C.renal.*`, `C.infMath.*`, `C.LIM` (limites de plausibilidade por campo do paciente), `C.engine` (gasometria/hemodinâmica/ventilação: `C.engine.compute(inputs, cfg, {})`, `C.engine.REF`, `C.engine.fmt`), `C.gasF.F` (definições de campos do engine).
+- Fontes clínicas e histórico das fórmulas: `../AUDITORIA.md`, `../PESQUISA.md`, `../PESQUISA-ACLS.md`. Os valores esperados dos testes foram conferidos à mão contra essas fontes: não os altere.
 - Kit de interface: `src/components/ui.tsx` (abaixo), `src/components/InfusionCard.tsx` (infusões), `src/components/Shell.tsx`.
 - Registro: `src/tools/registry.ts` → `registerTool({ id, group, tile, title, sub, keywords, weight?, Component })`. `Component` recebe `ToolProps = { api: { setSummary(texto) }, peso: number }` (peso já validado; NaN se ausente). Cada grupo tem `src/tools/<grupo>/index.ts` que importa as ferramentas do grupo (a ordem de import é a ordem na lista). **Não edite `src/tools/index.ts` nem arquivos de outros grupos.**
 - Exemplo completo: `src/tools/hemo/dva.tsx`.
 
-## Como portar uma calculadora
+## Como criar uma calculadora
 1. Separe a lógica numa função pura `compute(inputs) → modelo` em `src/tools/<grupo>/<id>.calc.ts` (sem DOM, sem React). O componente só lê o estado dos campos, chama `compute` e renderiza o modelo.
-2. Escreva `src/tools/<grupo>/<id>.test.ts` (Vitest: `import { describe, it, expect } from 'vitest'`; ambiente jsdom já configurado) portando TODAS as asserções correspondentes de `../tests/tests.js` (os valores esperados foram conferidos à mão contra as fontes — não os altere) e acrescentando casos de borda. Importar `@/lib/calc` no topo do teste carrega o `window.Calc`.
-3. Preserve exatamente limiares, doses, textos clínicos, notas e referências do arquivo antigo (eles foram auditados). Strings HTML antigas (`<b>`, `&lt;`, `&gt;`) viram JSX (`<b>`, `<`, `>`).
+2. Escreva `src/tools/<grupo>/<id>.test.ts` (Vitest: `import { describe, it, expect } from 'vitest'`; ambiente jsdom já configurado) com valores esperados calculados à mão a partir das fontes (não a partir do código) e casos de borda.
+3. Limiares, doses, textos clínicos, notas e referências vêm das fontes citadas em AUDITORIA.md; cite a fonte no rodapé (`Ref`).
 4. Estado dos campos: `useState<string>` por campo (texto como digitado; converta com `num()`); escolhas com `useState<string>`. Em cada render, `useEffect(() => { api.setSummary(texto) })` com o resumo para prontuário (mesmo texto do antigo), ou `''` quando não há o que copiar.
-5. Peso vem de `props.peso` (ferramentas com `weight: true` já mostram a faixa de peso/paciente no topo). Outros dados compartilhados do paciente: `usePatientField('idade' | 'sexo' | 'altura' | 'cr')` de `@/lib/patients` devolve `[valorTexto, setValor]` — use nos campos que o antigo marcava com `p: 'idade'` etc. (idade, sexo, altura, creatinina).
+5. Peso vem de `props.peso` (ferramentas com `weight: true` já mostram a faixa de peso/paciente no topo). Outros dados compartilhados do paciente: `usePatientField('idade' | 'sexo' | 'altura' | 'cr')` de `@/lib/patients` devolve `[valorTexto, setValor]` — use nos campos de idade, sexo, altura e creatinina.
 6. Valores guardados entre sessões (ex.: modo, diluições, aba escolhida): `useStore(chave, padrão)` de `@/lib/store`.
 
 ## Kit (`@/components/ui`)

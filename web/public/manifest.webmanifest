@@ -17,9 +17,9 @@
     { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
   "shortcuts": [
-    { "name": "PCR — ACLS guiado", "url": "./legado/index.html#/pcr", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "PCR — ACLS guiado", "url": "./#/pcr", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Drogas vasoativas", "url": "./#/dva", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Protocolos", "url": "./#/protocolos", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Nova gasometria", "url": "./legado/index.html#/gaso?novo=1", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Nova gasometria", "url": "./#/gaso?novo=1", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

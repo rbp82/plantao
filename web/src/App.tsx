@@ -3,13 +3,14 @@ import { Toast, toast } from '@heroui/react';
 import { C } from '@/lib/calc';
 import { useRoute, navigate } from '@/lib/router';
 import { useStoreVersion, useVaultState, bump } from '@/lib/store';
-import { BottomNav, LEGACY } from '@/components/Shell';
+import { BottomNav } from '@/components/Shell';
 import { Lock, Unsupported } from '@/screens/Lock';
 import { Home } from '@/screens/Home';
 import { ToolPage } from '@/screens/ToolPage';
-import { Patients } from '@/screens/Patients';
 import { Settings } from '@/screens/Settings';
 import { Protocols, ProtocolView } from '@/screens/Protocols';
+import { BEDS_ROUTES } from '@/screens/beds';
+import { PCR_ROUTES } from '@/screens/pcr';
 import { findTool } from '@/tools/registry';
 import '@/tools';
 
@@ -22,7 +23,8 @@ function useAutoLock(active: boolean) {
     const evs: (keyof WindowEventMap)[] = ['pointerdown', 'keydown', 'input'];
     evs.forEach((e) => window.addEventListener(e, touch, { passive: true, capture: true }));
     const check = () => {
-      if (!C.Vault.isOpen()) return;
+      /* PCR em andamento: não bloquear no meio da reanimação */
+      if (!C.Vault.isOpen() || C.isBusy()) return;
       const min = C.store.get<number>('autolock', 10);
       if (Date.now() - last > min * 60000) { C.Vault.lock().then(() => { bump(); toast('Bloqueado por inatividade'); }); }
     };
@@ -44,7 +46,7 @@ export function App() {
   useStoreVersion();
   useAutoLock(vault.open);
   const [, force] = useState(0);
-  /* sessão trazida do app legado (legado/), se houver, antes de decidir pela tela de senha */
+  /* sessão deixada por este mesmo app ao recarregar para aplicar uma atualização (ver main.tsx), antes de decidir pela tela de senha */
   const [resumed, setResumed] = useState(false);
   useEffect(() => { C.Vault.resume().catch(() => false).then(() => { bump(); setResumed(true); }); }, []);
   useEffect(() => { window.scrollTo(0, 0); }, [path]);
@@ -55,15 +57,15 @@ export function App() {
   else if (!vault.supported) { screen = <Unsupported />; nav = false; }
   else if (!vault.open) { screen = <Lock onDone={() => force((x) => x + 1)} />; nav = false; }
   else if (path === '' || path === 'home') screen = <Home />;
-  else if (path === 'leitos' || path === 'pacientes') screen = <Patients query={query} />;
   else if (path === 'ajustes' || path === 'seguranca') screen = <Settings />;
   else if (path === 'protocolos') screen = <Protocols query={query} />;
   else if (path === 'protocolo') screen = <ProtocolView slug={query.get('id') || ''} />;
-  /* #/pcr (atalhos e links antigos): o ACLS guiado vive no app anterior; troca o hash para não voltar aqui pelo "voltar" */
-  else if (path === 'pcr') { navigate('/', true); C.Vault.go(LEGACY('#/pcr')); screen = null; }
+  else if (BEDS_ROUTES[path]) { const S = BEDS_ROUTES[path]; screen = <S query={query} />; }
+  else if (PCR_ROUTES[path]) { const S = PCR_ROUTES[path]; screen = <S query={query} />; }
   else {
     const t = findTool(path);
-    if (t && t.href) { C.Vault.go(t.href); screen = null; }
+    /* ferramenta com tela própria (gasometria, PCR): o id na busca leva à rota dela */
+    if (t && t.href) { navigate(t.href, true); screen = null; }
     else if (t) screen = <ToolPage tool={t} />;
     else screen = <Home />;
   }

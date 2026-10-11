@@ -1,12 +1,12 @@
 /* Service worker do Plantão — GERADO em scripts/postbuild.mjs a partir deste modelo; não editar dist/sw.js à mão.
-   Escopo: a raiz do app (/plantao/). O app legado em legado/ tem o próprio service worker e não passa por aqui.
-   O Cache Storage é compartilhado por origem: cada SW só apaga os caches com o seu prefixo.
-   Fontes vêm empacotadas no build (sem Google Fonts): entram no pré-cache como qualquer asset. */
+   Escopo: a raiz do app (/plantao/). Fontes vêm empacotadas no build: entram no pré-cache como qualquer asset. */
 const VERSION = 'plantao-web-__VERSION__';
 const PRECACHE = __PRECACHE__;
 const BASE = new URL('./', self.location).pathname;
-/* caches do app antigo publicado na raiz (antes da migração) e do mecanismo anterior de protocolos: podem ser removidos */
-const isStale = (k) => /^plantao-v[1-7]$/.test(k) || k === 'plantao-protocolos-v1';
+/* leitor de foto (Tesseract, ≈ 15 MB em ocr/): baixado só no primeiro uso e mantido entre versões do app */
+const OCR = 'plantao-ocr-v1';
+/* caches de versões anteriores do app (raiz com Jekyll, legado/ e o mecanismo antigo de protocolos): podem ser removidos */
+const isStale = (k) => /^plantao-v\d+$/.test(k) || k === 'plantao-protocolos-v1' || k === 'plantao-ocr-7.0.0' || k === 'plantao-fonts';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
@@ -31,8 +31,18 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
-  /* app legado: tem o próprio service worker */
-  if (url.pathname.startsWith(BASE + 'legado/')) return;
+
+  /* leitor de foto: cache próprio, preenchido no primeiro uso */
+  if (url.pathname.startsWith(BASE + 'ocr/')) {
+    e.respondWith(caches.open(OCR).then(async (c) => {
+      const hit = await c.match(req, { ignoreSearch: true });
+      if (hit) return hit;
+      const r = await fetch(req);
+      if (r.ok) c.put(req, r.clone());
+      return r;
+    }));
+    return;
+  }
 
   /* protocolos (índice, .md e imagens): podem mudar sem nova versão do app → rede primeiro; offline, a cópia pré-cacheada */
   if (url.pathname.startsWith(BASE + 'protocolos/')) { e.respondWith(networkFirst(req)); return; }

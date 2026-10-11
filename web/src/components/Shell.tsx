@@ -28,15 +28,14 @@ export function Page({ children, className }: { children: ReactNode; className?:
   return <main className={`mx-auto w-full max-w-3xl px-4 pb-28 pt-3 ${className || ''}`}>{children}</main>;
 }
 
-/* legado (fase 2): leitos, gasometria e PCR ainda abrem no app anterior, com o mesmo cofre */
-export const LEGACY = (hash: string) => `${import.meta.env.BASE_URL}legado/index.html${hash}`;
-
-/* a aba PCR abre o ACLS guiado, que ainda vive no app anterior (o clique leva a sessão junto — ver main.tsx) */
+const PROTO = ['protocolos', 'protocolo'];
+const BEDS = ['leitos', 'pacientes', 'paciente', 'ficha', 'gaso'];
+const PCR = ['pcr', 'pcr-relatorio'];
 const TABS = [
-  { id: 'calc', label: 'Calcular', href: '#/', icon: Calculator, match: (p: string) => !['protocolos', 'protocolo', 'leitos', 'pacientes'].includes(p) },
-  { id: 'proto', label: 'Protocolos', href: '#/protocolos', icon: BookOpenText, match: (p: string) => p === 'protocolos' || p === 'protocolo' },
-  { id: 'leitos', label: 'Leitos', href: '#/leitos', icon: BedDouble, match: (p: string) => p === 'leitos' || p === 'pacientes' },
-  { id: 'pcr', label: 'PCR', href: LEGACY('#/pcr'), icon: HeartPulse, match: () => false, danger: true },
+  { id: 'calc', label: 'Calcular', href: '#/', icon: Calculator, match: (p: string) => ![...PROTO, ...BEDS, ...PCR].includes(p) },
+  { id: 'proto', label: 'Protocolos', href: '#/protocolos', icon: BookOpenText, match: (p: string) => PROTO.includes(p) },
+  { id: 'leitos', label: 'Leitos', href: '#/leitos', icon: BedDouble, match: (p: string) => BEDS.includes(p) },
+  { id: 'pcr', label: 'PCR', href: '#/pcr', icon: HeartPulse, match: (p: string) => PCR.includes(p), danger: true },
 ];
 
 export function BottomNav() {

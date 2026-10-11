@@ -1,17 +1,15 @@
-/* Armazenamento reativo sobre o cofre do núcleo (C.store).
-   C.store é imperativo; aqui ele ganha um canal de mudanças para o React re-renderizar. */
+/* Armazenamento reativo sobre o cofre do núcleo (store de src/lib/core/vault.ts).
+   O store avisa cada mudança por `store.onChange`; aqui isso vira uma versão que o React observa. */
 import { useSyncExternalStore, useCallback } from 'react';
-import { C } from './calc';
+import { store, Vault } from './core/vault';
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
 let version = 0;
 export const bump = () => { version++; listeners.forEach((l) => l()); };
 
-const rawSet = C.store.set.bind(C.store);
-const rawDel = C.store.del.bind(C.store);
-C.store.set = (k, v) => { rawSet(k, v); bump(); };
-C.store.del = (k) => { rawDel(k); bump(); };
+/* toda gravação/remoção no cofre (e toda mudança de estado do cofre) re-renderiza quem observa */
+store.onChange(bump);
 
 const subscribe = (l: Listener) => { listeners.add(l); return () => { listeners.delete(l); }; };
 const getVersion = () => version;
@@ -21,15 +19,15 @@ export function useStoreVersion() { return useSyncExternalStore(subscribe, getVe
 
 export function useStore<T>(key: string, fallback: T): [T, (v: T) => void] {
   useStoreVersion();
-  const value = C.store.get<T>(key, fallback);
-  const set = useCallback((v: T) => C.store.set(key, v), [key]);
+  const value = store.get<T>(key, fallback);
+  const set = useCallback((v: T) => store.set(key, v), [key]);
   return [value, set];
 }
 
 /* estado do cofre (bloqueado / aberto / temporário) */
 export const useVaultState = () => {
   useStoreVersion();
-  return { open: C.Vault.isOpen(), temp: C.Vault.isTemp(), exists: C.Vault.exists(), supported: C.Vault.supported() };
+  return { open: Vault.isOpen(), temp: Vault.isTemp(), exists: Vault.exists(), supported: Vault.supported() };
 };
 
 /* tema: único dado fora do cofre, em texto claro */

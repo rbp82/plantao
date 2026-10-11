@@ -7,7 +7,6 @@ import { C } from '@/lib/calc';
 import { useStore, useVaultState, applyTheme, type Theme, bump } from '@/lib/store';
 import { useActivePatient, patientSummary } from '@/lib/patients';
 import { allTools, GROUPS, GROUP_ORDER, toolHref, type Tool, type Group } from '@/tools/registry';
-import { LEGACY } from '@/components/Shell';
 import { toast } from '@heroui/react';
 
 export const Tile = ({ t, size = 44 }: { t: Tool; size?: number }) => (
@@ -113,7 +112,7 @@ export function Home() {
       ) : (
         <>
           <div className="flex flex-col gap-2 px-4 pt-2">
-            <a href={LEGACY('#/pcr')} className={`flex items-center gap-3 rounded-2xl px-4 py-3 ${pcr ? 'bg-danger text-danger-foreground' : 'bg-danger-soft text-danger-soft-foreground'}`}>
+            <a href="#/pcr" className={`flex items-center gap-3 rounded-2xl px-4 py-3 ${pcr ? 'bg-danger text-danger-foreground' : 'bg-danger-soft text-danger-soft-foreground'}`}>
               <HeartPulse className="size-6 shrink-0" />
               <span className="flex-1 leading-tight"><b className="block text-[15.5px] font-semibold">{pcr ? 'PCR em andamento' : 'PCR — ACLS guiado'}</b><small className="text-[13px] opacity-80">{pcr ? 'toque para voltar ao cronômetro' : 'cronômetro, algoritmo e relatório'}</small></span>
               <ChevronRight className="size-5" />

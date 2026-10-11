@@ -1,21 +1,21 @@
-# Plantão — calculadoras clínicas e protocolos (PWA)
+# Plantão — calculadoras clínicas, leitos, PCR guiada e protocolos (PWA)
 
-App web mobile-first, instalável e offline, para plantão de UTI e emergência: calculadoras auditadas (vasoativas, sedação, sepse, ajuste renal de antimicrobianos, CAD, sódio, TEG, fluido-responsividade, ventilação…), **protocolos institucionais em Markdown alimentados pelo GitHub**, acompanhamento por leito e PCR guiada. Site: **https://rbp82.github.io/plantao/** · repositório: https://github.com/rbp82/plantao.
+App web mobile-first, instalável e offline, para plantão de UTI e emergência: calculadoras auditadas (vasoativas, sedação, sepse, ajuste renal de antimicrobianos, CAD, sódio, TEG, fluido-responsividade, ventilação…), **quadro de leitos** com ficha, gasometria completa com tendência e leitura do ticket por foto (OCR no próprio aparelho), **PCR guiada** (ACLS adulto, AHA 2025) com cronômetros, registro e relatório, e **protocolos institucionais em Markdown** publicados a partir do GitHub. Site: **https://rbp82.github.io/plantao/** · repositório: https://github.com/rbp82/plantao.
 
-## Duas camadas, um cofre
+Um único app React 19 + TypeScript + HeroUI v3 (`@heroui/react`) + Tailwind v4, em `web/`. Não há mais "app anterior": toda a lógica clínica foi portada para TypeScript em `web/src/lib` (com os testes originais) e as telas para React.
 
-| | Onde | O quê |
-|---|---|---|
-| **App novo** (`web/`) | `/plantao/` | React 19 + HeroUI v3 (`@heroui/react`) + Tailwind v4, com componentes próprios em `src/components/pro.tsx` no lugar do HeroUI Pro. Tela inicial, busca, todas as calculadoras, aba **Protocolos**, lista de pacientes, ajustes/segurança. |
-| **App anterior** (raiz) | `/plantao/legado/` | Vanilla JS. Ainda responde por **Leitos (quadro completo, ficha, gasometria com tendência e leitura por foto)** e **PCR guiada**. Fase 2: portar para o app novo. |
+## Navegação
 
-Os dois compartilham o mesmo cofre criptografado (`localStorage` da mesma origem) e **a sessão passa de um para o outro sem pedir a senha de novo** (`Vault.handoff()`/`resume()` em `assets/js/core.js`: a chave de dados, não exportável, atravessa pelo IndexedDB com validade de 60 s e é apagada ao ser lida). O mesmo mecanismo evita pedir a senha quando o app recarrega para aplicar uma atualização.
+Barra inferior fixa, a mesma em todas as telas: **Calcular** (`#/`), **Protocolos** (`#/protocolos`), **Leitos** (`#/leitos`) e **PCR** (`#/pcr`, vermelha; mostra "Em curso" enquanto há uma PCR registrada). Cada calculadora fica em `#/<id>`; a gasometria completa em `#/gaso?novo=1`; `#/ajustes` tem tema, bloqueio automático, biometria, troca de senha e apagar tudo.
 
-## Navegação (app novo)
+Princípios: resumo primeiro e detalhe sob demanda; cor só no que está fora do normal; alvos de toque ≥ 44 px; sem botão "calcular" (tudo reativo); dados do paciente (peso, idade, sexo, altura, Cr) compartilhados entre calculadoras, ficha e gasometria.
 
-Barra inferior: **Calcular** (`#/`), **Protocolos** (`#/protocolos`), **Leitos** (`#/leitos`, lista de pacientes; o quadro completo abre no legado) e **PCR** (vermelho; abre o ACLS guiado no legado). Cada calculadora fica em `#/<id>`; `#/ajustes` tem tema, bloqueio automático, biometria, troca de senha e apagar tudo.
+## Leitos, gasometria e PCR
 
-Princípios: resumo primeiro e detalhe sob demanda; cor só no que está fora do normal; alvos de toque ≥ 44 px; sem botão "calcular" (tudo reativo); dados do paciente (peso, idade, sexo, altura, Cr) compartilhados entre calculadoras.
+- **Leitos** (`#/leitos`): azulejos por leito com a última gasometria (pH, lactato, P/F com setas de variação), dias de UTI, isolamento, alergia e paciente ativo; identificação rápida por iniciais, leito ou nº de atendimento; avulso (sem identificação, apaga em 12 h); admissão com ficha completa; altas e arquivados.
+- **Paciente** (`#/paciente?id=`): ficha resumida, última gasometria, tendência por parâmetro, registros, paradas registradas, nova gasometria, editar ficha, alta/arquivar.
+- **Gasometria** (`#/gaso?id=&rec=` ou `#/gaso?novo=1`): entrada por grupos (arterial, venosa central, hemodinâmica, ventilação, fluidos, renal), leitura com veredito, achados por canal, comparação com o registro anterior e mapa de Davenport; **foto do ticket do gasômetro** → OCR local (Tesseract, ≈ 15 MB baixados no primeiro uso e guardados offline) → conferência valor a valor com recortes da foto → lançamento.
+- **PCR** (`#/pcr`): algoritmo AHA 2025 caixa a caixa, cronômetro total e do ciclo, alertas de checagem de ritmo e de adrenalina, registro de cada ação com um toque, H's e T's, pós-RCE, encerramento e **relatório** (`#/pcr-relatorio?id=`) para copiar/compartilhar. Tela acesa e bloqueio automático suspenso enquanto a PCR estiver ativa.
 
 ## Protocolos
 
@@ -24,22 +24,25 @@ A aba Protocolos mostra os `.md` da pasta [`protocolos/`](protocolos/) deste rep
 ## Estrutura
 
 ```
-web/                          app novo (fonte)
-  src/legacy/{core,engine}.js   cópias idênticas dos motores auditados (window.Calc)
-  src/lib/                      calc.ts (ponte tipada), store.ts, patients.ts, router.ts, protocols.ts
-  src/components/               ui.tsx (kit), pro.tsx (Segment, ListView, Sheet… substitutos do HeroUI Pro), InfusionCard.tsx, Shell.tsx
+web/
+  src/lib/core/                 num.ts (números pt-BR, formatação, limites, faixas), renal.ts, infMath.ts,
+                                vault.ts (cofre AES-GCM + store), patients.ts — com os testes originais
+  src/lib/engine.ts             motor de gasometria/hemodinâmica/ventilação/renal (auditado) + definições de campos
+  src/lib/scan.ts               leitura do ticket por foto: parse (puro) e OCR local
+  src/lib/beds.ts               leitos: registros, ficha, tendência, formatação
+  src/lib/pcr.ts                PCR: algoritmo (derive/guide), referências AHA e relatório
+  src/lib/calc.ts               agregador `C` (num, fmt, renal, infMath, store, Vault, Patients, engine, gasF…)
+  src/lib/                      store.ts, patients.ts (ganchos React), router.ts, protocols.ts
+  src/components/               ui.tsx (kit), pro.tsx (Segment, ListView, Sheet…), InfusionCard.tsx, Shell.tsx
   src/tools/<grupo>/<id>.{calc.ts,tsx,test.ts}   uma calculadora = lógica pura + componente + testes
-  src/screens/                  Lock, Home, ToolPage, Patients, Settings, Protocols (+ ProtocolBody, carregado sob demanda)
+  src/screens/                  Lock, Home, ToolPage, Settings, Protocols (+ ProtocolBody), beds/ (Board, PatientPage, Ficha, Gaso, GasoScan), pcr/ (PcrStart, PcrLive, PcrReport)
   src/styles/                   app.css (tema + só os componentes HeroUI usados), fonts.css (Inter e IBM Plex Mono empacotadas)
-  src/legacy/*.test.ts          paridade dos motores com assets/js e a bateria do app anterior rodando no Vitest
-  public/                       manifest.webmanifest, icons/
-  scripts/postbuild.mjs         gera dist/sw.js (pré-cache com hash), copia o legado para dist/legado/ e publica protocolos/
+  public/                       manifest.webmanifest, icons/, ocr/ (Tesseract: baixado sob demanda, fora do pré-cache)
+  scripts/postbuild.mjs         gera dist/sw.js (pré-cache com hash) e publica protocolos/
   scripts/protocolos.mjs        índice dos protocolos (index.json) e servidor da pasta em desenvolvimento; frontmatter.mjs = cabeçalho
-  CONVENTIONS.md                convenções para portar/criar calculadoras
+  CONVENTIONS.md                convenções para criar calculadoras e telas
 protocolos/                   protocolos em Markdown (publicados junto com o app a cada push)
-index.html, sw.js, manifest.webmanifest, assets/   app anterior (publicado em legado/)
-tests/                        bateria do app anterior (304 asserções; roda no `npm test` e também abrindo tests/index.html por HTTP)
-AUDITORIA.md, PESQUISA*.md    fórmulas conferidas, fontes e correções
+AUDITORIA.md, PESQUISA*.md    fórmulas conferidas, fontes e correções (motor, calculadoras, ACLS)
 ```
 
 ## Desenvolvimento (`web/`)
@@ -48,62 +51,40 @@ Node 22+ (na máquina atual: `%USERPROFILE%\node`; a política do PowerShell blo
 
 ```
 npm install            (node_modules pode ser uma junção fora do OneDrive)
-npm run dev            http://localhost:5173/plantao/
-npm test               Vitest — 255 testes das calculadoras portadas (valores esperados conferidos à mão),
-                       paridade byte a byte dos motores (src/legacy ↔ assets/js) e a bateria inteira do app anterior
+npm run dev            http://localhost:5173/plantao/  (a pasta ../protocolos é servida em /plantao/protocolos/)
+npm test               Vitest — 613 testes: calculadoras, núcleo e cofre, motor de gasometria, leitura por foto,
+                       leitos, PCR e protocolos (valores esperados conferidos à mão contra as fontes)
 npm run typecheck      tsc --noEmit
 npm run build          vite build + scripts/postbuild.mjs → dist/ pronto para o GitHub Pages
 npm run preview        serve dist/ em http://localhost:4173/plantao/
 ```
 
-Só dependências públicas do npm: o HeroUI Pro (que exigia login) foi substituído por componentes próprios em `src/components/pro.tsx`, por isso o build roda no GitHub Actions sem credenciais.
+Só dependências públicas do npm; nada externo em tempo de execução (fontes e OCR empacotados).
 
 ## Publicação (GitHub Pages via GitHub Actions)
 
-**Publicar = fazer push na branch `main`.** O workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) roda typecheck, os testes (Vitest), `npm run build` (Vite + postbuild) e envia `web/dist/` (app novo, `legado/` e `protocolos/`) para o GitHub Pages com `actions/deploy-pages`. Em 1–2 minutos o site em **https://rbp82.github.io/plantao/** está atualizado. Dá para disparar à mão em **Actions → Deploy Plantão to GitHub Pages → Run workflow**.
+**Publicar = fazer push na branch `main`.** O workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) roda typecheck, os testes, `npm run build` e envia `web/dist/` para o GitHub Pages com `actions/deploy-pages`. Em 1–2 minutos o site está atualizado. Dá para disparar à mão em **Actions → Deploy Plantão to GitHub Pages → Run workflow**.
 
-Configuração necessária no repositório (feita uma vez): **Settings → Pages → Build and deployment → Source = GitHub Actions**. Com *Deploy from a branch* o Pages passa a servir a raiz da branch com Jekyll (o app antigo, e os `.md` de `protocolos/` virando `.html`) e ignora o workflow. A branch `gh-pages` que existiu durante a migração não é mais usada e pode ser apagada.
+Configuração necessária no repositório (feita uma vez): **Settings → Pages → Build and deployment → Source = GitHub Actions**.
 
-### Build local (opcional)
+`deploy.ps1` (ou `deploy.cmd`, ou `npm run deploy` em `web/`) reproduz localmente o que o workflow faz e deixa o resultado em `deploy/github-pages/` para conferir antes de publicar (`-SkipTests`, `-SkipTypecheck`, `-OutputDir`, `-Commit`, `-Push`).
 
-`deploy.ps1` reproduz localmente o que o workflow faz e deixa o resultado em `deploy/github-pages/` para conferir antes de publicar:
+O `sw.js` é gerado a cada build com a versão `plantao-web-<package.json version>-<hash do conteúdo>`: qualquer build diferente vira uma versão nova, instalada em segundo plano e aplicada na próxima troca de tela, levando a sessão junto (sem pedir a senha de novo). Os arquivos do OCR ficam num cache próprio, preenchido no primeiro uso e mantido entre versões.
 
-```
-.\deploy.ps1                    typecheck + testes + build + pacote em deploy/github-pages
-deploy.cmd                      o mesmo, para duplo clique / Prompt de Comando
-npm run deploy                  o mesmo, de dentro de web/
-.\deploy.ps1 -SkipTests         pula os testes          -SkipTypecheck pula o tsc
-.\deploy.ps1 -OutputDir <pasta> pasta de saída personalizada
-.\deploy.ps1 -Commit            commit das alterações (mensagem com -Message "…")
-.\deploy.ps1 -Push              commit + push da main — e é o push que publica
-```
+## Adicionar uma calculadora
 
-### Versões e service workers
-
-- O `sw.js` do app novo é gerado a cada build com a versão `plantao-web-<package.json version>-<hash do conteúdo>`: **não precisa editar nada** — qualquer build diferente vira uma versão nova, instalada em segundo plano e aplicada na próxima troca de tela.
-- O legado tem o próprio service worker em `legado/sw.js`: ao alterar qualquer arquivo do app anterior (`assets/**`, `index.html`), **incremente `VERSION` em `sw.js`** da raiz, como antes. Os dois service workers convivem (cada um só apaga os caches com o próprio prefixo).
-- Arquivos do app anterior que ficaram na raiz do repositório antes da migração podem ser apagados.
-
-## Adicionar uma calculadora (app novo)
-
-Ver [`web/CONVENTIONS.md`](web/CONVENTIONS.md): `src/tools/<grupo>/<id>.calc.ts` (função pura), `<id>.tsx` (componente + `registerTool`), `<id>.test.ts`, e importar no `index.ts` do grupo. Motores auditados em `window.Calc` (`C.num`, `C.fmt`, `C.renal`, `C.infMath`, `C.engine`…).
+Ver [`web/CONVENTIONS.md`](web/CONVENTIONS.md): `src/tools/<grupo>/<id>.calc.ts` (função pura), `<id>.tsx` (componente + `registerTool`), `<id>.test.ts`, e importar no `index.ts` do grupo. Helpers auditados em `C` (`@/lib/calc`): `C.num`, `C.fmt`, `C.renal`, `C.infMath`, `C.engine`, `C.gasF`, `C.LIM`…
 
 ## Login, criptografia e pacientes
 
 - Na primeira abertura o app pede para criar uma senha. Tudo o que ele guarda fica num único bloco cifrado com **AES-256-GCM** no `localStorage`; só o tema fica em texto claro.
 - A chave de dados é aleatória (256 bits), guardada cifrada pela senha (PBKDF2-SHA256, 600 000 iterações) e, opcionalmente, pela biometria (passkey WebAuthn com extensão PRF + HKDF). Trocar a senha não invalida a biometria.
 - Não há servidor nem conta: **a senha não pode ser recuperada**. "Esqueci a senha" apaga tudo.
-- Bloqueio automático por inatividade (2, 5, 10 ou 30 min), espera crescente após 5 senhas erradas e modo temporário ("usar sem salvar dados").
+- Bloqueio automático por inatividade (2, 5, 10 ou 30 min; suspenso durante uma PCR), espera crescente após 5 senhas erradas e modo temporário ("usar sem salvar dados").
 - Biometria: Android com Chrome recente ou iPhone com iOS 18+, ativável só no endereço definitivo.
-- **Pacientes:** identificados por iniciais, leito ou nº de atendimento; o ativo alimenta peso, idade, sexo, altura e creatinina em todas as calculadoras; sem paciente ativo, registro avulso que expira em 12 h.
+- **Pacientes:** identificados por iniciais, leito ou nº de atendimento; o ativo alimenta peso, idade, sexo, altura e creatinina em todas as calculadoras; sem paciente ativo, registro avulso que expira em 12 h. O formato dos dados é o mesmo das versões anteriores: aparelhos que já tinham pacientes, gasometrias e relatórios de PCR continuam abrindo tudo.
 
 ## Testes e auditoria
 
-- App novo: `npm test` em `web/` (Vitest). Cada calculadora portada tem o seu `*.test.ts` com as asserções originais de `tests/tests.js` mais casos de borda. O mesmo comando roda a bateria do app anterior (`src/legacy/suite.test.ts` carrega `tests/tests.js` no jsdom) e confere que `src/legacy/{core,engine}.js` são idênticos a `assets/js/` — o CI falha se um motor for corrigido só de um lado.
-- App anterior: `tests/index.html` (304 testes) continua funcionando no navegador, se quiser ver a tabela.
-- Fórmulas, fontes e correções: [AUDITORIA.md](AUDITORIA.md). Base do `engine.js`: [PESQUISA.md](PESQUISA.md); PCR: [PESQUISA-ACLS.md](PESQUISA-ACLS.md).
-
-## Diferenças em relação aos arquivos originais
-
-- Resultados em tempo real; peso/idade/sexo/altura/Cr compartilhados; infusões nos dois sentidos com diluições editáveis salvas no aparelho.
-- Correções de bugs do original: contador do bundle de sepse, faixa do propofol (mg/kg/h), comparação de ponto flutuante na vasopressina, prontuário do sódio sem NaCl 3% em sintomas moderados agudos, plural "disfunções" na triagem de sepse, peso que não chegava ao cálculo de débito cardíaco indexado.
+- `npm test` em `web/` (Vitest). Cada calculadora tem o seu `*.test.ts`; os módulos de `src/lib` carregam as asserções da bateria original (números pt-BR, infusões, função renal, gasometria e motor completo, cofre criptografado, leitos, PCR caixa a caixa, leitura do ticket) mais casos de borda.
+- Fórmulas, fontes e correções: [AUDITORIA.md](AUDITORIA.md). Base do motor de gasometria: [PESQUISA.md](PESQUISA.md); PCR: [PESQUISA-ACLS.md](PESQUISA-ACLS.md).

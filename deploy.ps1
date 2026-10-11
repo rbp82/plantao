@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Executa verificacao de tipos, suite de testes Vitest, compilacao do app React 19 (web/)
-    com Vite e empacotamento do app legado + protocolos em uma pasta de deploy pronta para o GitHub Pages.
+    com Vite (protocolos e leitor de foto incluídos) em uma pasta de deploy pronta para o GitHub Pages.
     Opcionalmente realiza commit e push caso o Git esteja configurado.
 
 .PARAMETER SkipTests
@@ -27,7 +27,7 @@
 
 .EXAMPLE
     .\deploy.ps1
-    Executa testes, typecheck, build e gera deploy/github-pages com legado e protocolos.
+    Executa testes, typecheck, build e gera deploy/github-pages.
 
 .EXAMPLE
     .\deploy.ps1 -SkipTests
@@ -141,9 +141,7 @@ $requiredFiles = @(
     'index.html',
     'manifest.webmanifest',
     'sw.js',
-    '.nojekyll',
-    'legado\index.html',
-    'legado\sw.js'
+    '.nojekyll'
 )
 
 $missingFiles = @()
