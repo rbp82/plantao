@@ -1,7 +1,7 @@
 /* Lidocaína antiarrítmica — bolus por peso, contexto e infusão (ver lidocaina.calc.ts). */
 import { useEffect, useState } from 'react';
 import { InfusionCard } from '@/components/InfusionCard';
-import { ChoiceList, Note, Readout, Readouts, Section, Steps } from '@/components/ui';
+import { ChoiceList, Note, Readout, Readouts, Ref, Section, Steps } from '@/components/ui';
 import { registerTool, type ToolProps } from '@/tools/registry';
 import { LIDO, LIDO_CTX, LIDO_CTX_NOTE, computeLidoBolus, type LidoCtx } from './lidocaina.calc';
 
@@ -36,6 +36,7 @@ function LidoTool({ api, peso }: ToolProps) {
         ]} />
       </Section>
       <Note cls="info">Amiodarona é 1ª linha para TV/FV com cardiopatia estrutural. Lidocaína: TV associada a isquemia aguda/pós-IAM ou quando amiodarona indisponível/contraindicada.</Note>
+      <Ref>PCR (FV/TV sem pulso refratária; 1–1,5 mg/kg, depois 0,5–0,75 mg/kg; antiarrítmico após o 3º choque): Wigginton JG et al. Part 9: Adult Advanced Life Support: 2025 AHA Guidelines for CPR and ECC. Circulation 2025;152(Suppl 2) (PMID 41122884; DOI 10.1161/CIR.0000000000001376); Panchal AR et al. Part 3: Adult Basic and Advanced Life Support: 2020 AHA Guidelines. Circulation 2020;142(Suppl 2):S366–S468 (PMID 33081529). Intervalo de 5–10 min e máximo cumulativo de 3 mg/kg: AHA 2010 (Neumar RW et al. Circulation 2010;122(Suppl 3):S729–S767, PMID 20956224) — não constam nos textos de 2020/2025. Infusão de 1–4 mg/min (20–50 mcg/kg/min), redução ~50% após 24 h e em hepatopatia, toxicidade neurológica &gt; 6 mcg/mL: bula FDA/DailyMed (lidocaína em glicose, Baxter, setid f21512ea-c7c3-4766-b976-b2c0b5616bf0). TV monomórfica estável: Al-Khatib SM et al. 2017 AHA/ACC/HRS Guideline for Ventricular Arrhythmias. J Am Coll Cardiol 2018;72:e91–e220 (PMID 29097296). Amiodarona ou lidocaína na FV/TV refratária: Panchal AR et al. 2018 AHA Focused Update on Antiarrhythmic Drugs. Circulation 2018;138:e740–e749 (PMID 30571262).</Ref>
     </>
   );
 }

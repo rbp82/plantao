@@ -1,7 +1,7 @@
 /* 16. PCR guiada — algoritmo AHA 2025 caixa a caixa, temporizadores e relatório
    (portado de tests/tests.js, seção 16; Part 9, Figure 2; PESQUISA-ACLS.md). Valores esperados conferidos à mão. */
 import { describe, it, expect } from 'vitest';
-import { derive, guide, report, outcomeTxt, mmss, REF, HT, RITMO, PROTO, isBusy, active, type PcrCase, type PcrEvent, type PcrEventType, type PcrInput } from './pcr';
+import { derive, guide, report, outcomeTxt, mmss, REF, HT, RITMO, PROTO, CITATIONS, isBusy, active, type PcrCase, type PcrEvent, type PcrEventType, type PcrInput } from './pcr';
 
 const T0 = Date.UTC(2026, 9, 3, 12, 0, 0);
 const at = (min: number) => T0 + min * 60000;
@@ -80,6 +80,25 @@ describe('16. PCR guiada — algoritmo AHA 2025 caixa a caixa, temporizadores e 
     it('Relatório: desfecho com horário do RCE', () => expect(rpt()).toContain('RCE em 22:00'));
     it('Relatório: linha do tempo', () => expect(rpt()).toContain('22:00 · '));
     it('Relatório: cita a diretriz', () => expect(rpt()).toContain('AHA 2025'));
+    it('Relatório: cita a publicação da Part 9 com PMID e DOI', () => expect(rpt()).toContain('Circulation 2025;152(16 Suppl 2):S538–S577; PMID 41122884; doi:10.1161/CIR.0000000000001376'));
+  });
+});
+
+describe('PCR guiada — publicações das diretrizes (PubMed, 11/10/2026)', () => {
+  it('AHA 2025 Part 9 (Wigginton) e 2020 Part 3 (Panchal) com PMID/DOI', () => {
+    expect(CITATIONS.part9).toMatchObject({ pmid: '41122884', doi: '10.1161/CIR.0000000000001376' });
+    expect(CITATIONS.aha2020).toMatchObject({ pmid: '33081529', doi: '10.1161/CIR.0000000000000916' });
+    expect(CITATIONS.part7.pmid).toBe('41122888'); expect(CITATIONS.part10.pmid).toBe('41122889'); expect(CITATIONS.part11.pmid).toBe('41122894');
+    Object.values(CITATIONS).forEach((c) => { expect(c.doi).toMatch(/^10\.1161\/CIR\.\d{16}$/); expect(c.pmid).toMatch(/^\d{8}$/); expect(c.j).toMatch(/^Circulation 20(20|25);/); });
+  });
+  it('doses e tempos do PROTO batem com a Part 9 de 2025: adrenalina 1 mg a cada 3–5 min, ciclo de 2 min, lidocaína 1–1,5 e 0,5–0,75 mg/kg', () => {
+    expect(PROTO.epiMinMs / 60000).toBe(3); expect(PROTO.epiMaxMs / 60000).toBe(5); expect(PROTO.cicloMs / 60000).toBe(2);
+    expect(PROTO.lido1).toEqual([1, 1.5]); expect(PROTO.lido2).toEqual([0.5, 0.75]);
+    expect(REF.epi.q).toContain('1 milligram every 3 to 5 minutes');
+    expect(REF.amio.q).toContain('First dose: 300 milligram bolus. Second dose: 150 milligram');
+    expect(REF.amio.q).toContain('1 to 1.5 milligrams per kilogram. Second dose: 0.5 to 0.75 milligrams per kilogram');
+    expect(REF.energia.q).toContain('120 to 200 Joules'); expect(REF.energia.q).toContain('Monophasic: 360 Joules');
+    expect(REF.post.q).toContain('at least 65 mm Hg'); expect(REF.post.q).toContain('90% to 98%'); expect(REF.post.q).toContain('35–45 mm Hg'); expect(REF.post.q).toContain('32 °C and 37.5 °C');
   });
 });
 

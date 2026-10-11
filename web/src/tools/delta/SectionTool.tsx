@@ -4,7 +4,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Card } from '@heroui/react';
 import { ChevronDown } from 'lucide-react';
-import { CalcLine, CheckGroup, CheckRow, Grid, NumField, Pill, Readout, Readouts, Section, SegField, Span2, Steps } from '@/components/ui';
+import { CalcLine, CheckGroup, CheckRow, Grid, NumField, Pill, Readout, Readouts, Ref, Section, SegField, Span2, Steps } from '@/components/ui';
 import { usePatientField } from '@/lib/patients';
 import type { ToolApi } from '@/tools/registry';
 import { F, PK, fmt, itemCls, lbl, placeholderOf, readNum, defRefs, runSection, type Inputs, type OutItem, type RefEntry, type SectionDef, type SectionOut, type ToolDef } from './delta.calc';
@@ -127,6 +127,7 @@ export function SectionTool({ def, api, peso, weight }: { def: ToolDef; api: Too
       })}
       {model.dx.length > 0 && <Section title="Interpretação"><Steps items={model.dx.map((x) => [x.s, x.t])} /></Section>}
       {refs.length > 0 && <Collapsible title="Fórmulas, cortes e fontes"><RefList refs={refs} /></Collapsible>}
+      {def.footer && <Ref>{def.footer}</Ref>}
     </div>
   );
 }

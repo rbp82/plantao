@@ -45,8 +45,8 @@ AUROCs agrupadas (33 estudos, 1.352 pacientes): EEO 0,92 · VtC 0,92 · VVS 0,90
 
 - Consistência: [H+] = 24·PaCO2/HCO3 deve bater com 10^(9−pH).
 - Acidose metabólica (Winter): PaCO2 esperada = 1,5·HCO3 + 8 ± 2.
-- Alcalose metabólica: PaCO2 esperada = 0,7·HCO3 + 21 ± 2.
-- Acidose respiratória: HCO3 sobe 1 (aguda) ou 3,5 (crônica) a cada 10 mmHg de PaCO2.
+- Alcalose metabólica: PaCO2 esperada = 0,7·(HCO3 − 24) + 40 ± 2 (Berend K et al., NEJM 2014;371:1434, PMID 25295502). [Auditoria 2026-10: a forma anterior "0,7·HCO3 + 21" não consta da fonte.]
+- Acidose respiratória: HCO3 sobe 1 (aguda) ou 4 (crônica; estudos 4–5) a cada 10 mmHg de PaCO2 (Berend 2014; González SB, Adrogué HJ, Madias NE et al., Kidney Int Rep 2018;3:1163, PMID 30197983: 0,476 mEq/L por mmHg em estudo prospectivo). [Auditoria 2026-10: o app usava 3,5.]
 - Alcalose respiratória: HCO3 cai 2 (aguda) ou 4–5 (crônica) a cada 10 mmHg.
 - Ânion gap = Na − (Cl + HCO3); AG corrigido = AG + 2,5·(4 − albumina em g/dL).
 - Delta ratio = (AGc − 12)/(24 − HCO3): < 0,4 acidose hiperclorêmica · 0,4–0,8 mista · 0,8–2 AG alto puro · > 2 AG alto + alcalose metabólica.

@@ -1,7 +1,7 @@
 /* 9. TEG (portado de tests/tests.js) + ordem da conduta e regra K prolongado → fibrinogênio */
 import { describe, it, expect } from 'vitest';
 import '@/lib/calc';
-import { computeTeg, curve, DEFAULTS, dev, parseValues, PRESETS, status, tegText, type Key, type TegValues } from './teg.calc';
+import { computeTeg, curve, DEFAULTS, dev, LY30_HIPER, parseValues, PRESETS, status, tegText, type Key, type TegValues } from './teg.calc';
 
 const run = (over: Partial<TegValues> = {}) => computeTeg({ ...DEFAULTS, ...over });
 const txt = (over: Partial<TegValues> = {}) => tegText(run(over));
@@ -11,6 +11,17 @@ const texts = (over: Partial<Record<Key, string>> = {}): Record<Key, string> => 
 describe('9. TEG', () => {
   it('TEG: K 5 isolado → repor fibrinogênio', () => expect(txt({ K: 5 })).toContain('Repor fibrinogênio'));
   it('TEG: LY30 8% → ácido tranexâmico', () => expect(txt({ K: 2, LY: 8 })).toContain('tranexâmico'));
+  it('LY30 ≥ 3% é hiperfibrinólise (Chapman 2013): 3,0 → TXA e LY30 "high"; 2,9 → normal', () => {
+    expect(LY30_HIPER).toBe(3);
+    const m3 = run({ LY: 3 });
+    expect(m3.s.LY).toBe('high'); expect(m3.cand[0].t).toBe('Ácido tranexâmico'); expect(m3.ab).toEqual(['hiperfibrinólise']);
+    const m29 = run({ LY: 2.9 });
+    expect(m29.s.LY).toBe('normal'); expect(m29.cand).toEqual([]);
+  });
+  it('doses das condutas seguem Rossaint 2023: fibrinogênio 3–4 g / crio 15–20 U se ≤ 1,5 g/L; plaquetas 4–8 U, > 50.000 (> 100.000 no TCE)', () => {
+    expect(run({ A: 45 }).cand.find((x) => x.t === 'Repor fibrinogênio')!.dose).toBe('Concentrado de fibrinogênio 3–4 g ou crioprecipitado 15–20 U (dose inicial) · repor se fibrinogênio ≤ 1,5 g/L (150 mg/dL) ou déficit funcional no TEG');
+    expect(run({ MA: 40 }).cand.find((x) => x.t === 'Transfundir plaquetas')!.dose).toBe('1 aférese ou 4–8 U randômicas · manter > 50.000/µL (> 100.000 no TCE)');
+  });
 });
 
 describe('TEG — regra K prolongado → fibrinogênio', () => {
@@ -22,7 +33,7 @@ describe('TEG — regra K prolongado → fibrinogênio', () => {
     const c = m.cand.find((x) => x.t === 'Repor fibrinogênio')!;
     expect(c.d.startsWith('K prolongado sugere')).toBe(true);
     expect(c.u).toBeCloseTo(1, 9); // dev(5, 1, 3) = (5 − 3) / 2
-    expect(c.dose).toContain('Crioprecipitado');
+    expect(c.dose).toContain('crioprecipitado 15–20 U'); // Rossaint 2023, Rec. 29: 3–4 g ≈ 15–20 U
   });
   it('ângulo baixo e K prolongado juntos: "Ângulo α reduzido e K prolongado"', () => {
     const c = preset('Hipofibrinogenemia').cand.find((x) => x.t === 'Repor fibrinogênio')!;

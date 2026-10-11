@@ -108,7 +108,7 @@ function TegTool({ api }: ToolProps) {
       <Section title="Por parâmetro">
         <Steps items={m.interp.map((x): Step => [x.cls, <><b>{x.head}</b>{x.body}</>])} />
       </Section>
-      <Ref>Referências para ativação por caolim (TEG®). LY30 &gt; 3% como limiar de hiperfibrinólise segue a literatura de trauma (Chapman 2013); a faixa do fabricante vai até 8%. Valores variam com reagente, dispositivo (TEG × ROTEM) e laboratório. Correlacionar com sangramento clínico e contexto (trauma, hepatopatia, CEC, sepse).</Ref>
+      <Ref>Referências para TEG® citratado com caolim (faixas do fabricante; Scarpelini S et al. Braz J Med Biol Res 2009;42:1210 — PMID 19882085 — encontrou em voluntários R 3,8–9,8 · K 0,7–3,4 · α 47,8–77,7° · MA 49,7–72,7 · LY30 até 5,8%). LY30 ≥ 3% como limiar de hiperfibrinólise segue a literatura de trauma: Chapman MP et al. J Trauma Acute Care Surg 2013;75:961–967 — PMID 24256667 — doi:10.1097/TA.0b013e3182aa9c9f; a faixa do fabricante é 0–7,4% (limite 7,5%). Condutas: TXA — CRASH-2, Lancet 2010;376:23 — PMID 20554319 — doi:10.1016/S0140-6736(10)60835-5 e Rossaint R et al. Crit Care 2023;27:80 — PMID 36859355 — doi:10.1186/s13054-023-04327-7 (Rec. 23 TXA 1 g/10 min + 1 g/8 h; Rec. 29 fibrinogênio 3–4 g se ≤ 1,5 g/L; Rec. 30 plaquetas &gt; 50/&gt; 100 × 10⁹/L, 4–8 U). Reanimação guiada por TEG no trauma: Gonzalez E et al. Ann Surg 2016;263:1051 — PMID 26720428 (r-TEG; limiares ACT/ângulo &lt; 63°/MA &lt; 55 mm/LY30 ≥ 3%); Holcomb JB et al. Ann Surg 2012;256:476 — PMID 22868371; Moore EE et al. Nat Rev Dis Primers 2021;7:30 — PMID 33927200. Valores variam com reagente, dispositivo (TEG × ROTEM) e laboratório. Correlacionar com sangramento clínico e contexto (trauma, hepatopatia, CEC, sepse).</Ref>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 /* Bundle da 1ª hora: checklist SSC/ILAS e volume de 30 mL/kg. */
 import { useEffect, useState } from 'react';
-import { CheckGroup, CheckRow, Note, NumField, Readout, Readouts, Section } from '@/components/ui';
+import { CheckGroup, CheckRow, Note, NumField, Readout, Readouts, Ref, Section } from '@/components/ui';
 import { registerTool, type ToolProps } from '@/tools/registry';
 import { BUNDLE, computeBundle } from './bundle.calc';
 import { val } from './shared';
@@ -27,6 +27,7 @@ function BundleTool({ api, peso }: ToolProps) {
         <div className="mt-3 h-1 overflow-hidden rounded-full bg-foreground/10"><i className={`block h-full transition-[width] ${BAR[m.barCls]}`} style={{ width: `${m.pct}%` }} /></div>
       </Section>
       <Note cls="warn"><b>Reavaliação em 6 h</b> (hiperlactatemia ou hipotensão): PAM, diurese, nível de consciência, perfusão periférica e lactato.</Note>
+      <Ref>Fontes: SSC Hour-1 bundle — Levy MM, Evans LE, Rhodes A. Intensive Care Med 2018;44:925 (PMID 29675566): lactato (repetir se {'>'} 2), hemoculturas antes do antibiótico, antibiótico de amplo espectro, 30 mL/kg se hipotensão ou lactato ≥ 4, vasopressor para PAM ≥ 65. SSC 2021 — Evans L et al. Crit Care Med 2021;49:e1063 (PMID 34605781): ≥ 30 mL/kg nas primeiras 3 h, antibiótico em até 1 h no choque/sepse provável, noradrenalina 1ª linha, início em acesso periférico aceitável. ILAS, Protocolo clínico adulto (rev. ago/2018): 2º lactato em 2–4 h e reavaliação das 6 h. Clearance de lactato ≥ 10%: Jones AE et al. JAMA 2010;303:739 (PMID 20179283).</Ref>
     </div>
   );
 }

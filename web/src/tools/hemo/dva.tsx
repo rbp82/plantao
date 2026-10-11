@@ -14,7 +14,7 @@ function DvaTool({ api, peso }: ToolProps) {
       <div className="flex flex-col gap-3">
         {DVA.map((d) => <InfusionCard key={d.id} d={d} mode={set.mode} peso={peso} input={set.inputs[d.id] || ''} onInput={(v) => set.setInput(d.id, v)} />)}
       </div>
-      <Ref>Diluições padrão em SF/SG 250 mL (UTI adulto) — toque na diluição para alterar; a alteração fica salva neste aparelho. Faixas de dose conforme bula/UpToDate; titular pela resposta clínica.</Ref>
+      <Ref>Diluições padrão em SF/SG 250 mL (UTI adulto) — toque na diluição para alterar; a alteração fica salva neste aparelho. Faixas de dose conforme bulas FDA/DailyMed (nitroprussiato, nitroglicerina, dopamina — Baxter —, dobutamina, milrinona, vasopressina — Vasostrict) e literatura; titular pela resposta clínica. Vasopressina associada à noradrenalina em 0,25–0,5 mcg/kg/min: Evans L et al. Surviving Sepsis Campaign 2021. Crit Care Med 2021;49:e1063–e1143 (PMID 34605781; DOI 10.1097/CCM.0000000000005337). Dopamina em dose baixa sem proteção renal: Bellomo R et al. Lancet 2000;356:2139–43 (PMID 11191541).</Ref>
     </>
   );
 }

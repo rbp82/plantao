@@ -1,8 +1,16 @@
-/* Drogas vasoativas — dados e faixas (bula/UpToDate; AUDITORIA.md §2). Sem React. */
+/* Drogas vasoativas — dados e faixas (AUDITORIA.md §2; docs/auditoria-2026-10/3). Sem React.
+   Fontes: bulas FDA/DailyMed (nitroprussiato, nitroglicerina, dopamina Baxter, dobutamina, milrinona, vasopressina, noradrenalina);
+   SSC 2021 (Evans L et al. Crit Care Med 2021;49:e1063, PMID 34605781): vasopressina associada com noradrenalina 0,25–0,5 mcg/kg/min;
+   Auchet T et al. Ann Intensive Care 2017;7:43 (PMID 28425079): alta dose = > 1 mcg/kg/min. */
 import type { Cls } from '@/lib/calc';
 import type { Drug } from '@/tools/infusion';
 
-const noraAlert = (d: number): [Cls, string][] => (d > 1 ? [['warn', 'Dose &gt; 1 mcg/kg/min — rever estratégia vasopressora ou associar vasopressina.']] : []);
+const noraAlert = (d: number): [Cls, string][] => [
+  /* SSC 2021, recomendação 38 (fraca): associar vasopressina em vez de escalar a nora; na prática 0,25–0,5 mcg/kg/min */
+  ...(d >= 0.25 ? [['info', 'Noradrenalina ≥ 0,25 mcg/kg/min — SSC 2021 sugere associar vasopressina (habitual entre 0,25 e 0,5) em vez de escalar a dose.'] as [Cls, string]] : []),
+  /* > 1 mcg/kg/min: alta dose (Auchet 2017) — rever estratégia */
+  ...(d > 1 ? [['warn', 'Dose &gt; 1 mcg/kg/min (alta dose) — rever estratégia vasopressora, vasopressina e causa do choque.'] as [Cls, string]] : []),
+];
 
 export const DVA: Drug[] = [
   { id: 'nor', name: 'Noradrenalina', sub: 'Vasopressor · α1 > β1', amt: 16, amtU: 'mg', vol: 250, dose: 'mcg/kg/min', range: [0.01, 3], alt: ['mcg/min'], alerts: noraAlert },

@@ -91,6 +91,24 @@ describe('13. Motor — Stewart, oxigenação, perfusão, débito, fluidos, vent
     expect(e.d.dcFick).toBeCloseTo((asc * (138.1 - 11.49 * Math.log(60) + 0.378 * 90)) / (1.34 * 12 * 0.27 * 10), 3);
     expect(gfind(e, 'dcfick').n).toContain('só tendência');
   });
+  it('Fick estimado (LaFarge) em mulher: coeficiente de ln(idade) é 17,04 (não constante) — LaFarge & Miettinen 1970, PMID 5416840; Reiter, Herz 2023, PMID 37439804', () => {
+    // mulher 60 a, FC 90, ASC(70 kg/170 cm): VO2/ASC = 138,1 − 17,04 × ln(60) + 0,378 × 90 = 102,35 mL/min/m²
+    // (a versão anterior do app subtraía 17,04 como constante e dava 108,04 → DC 5,6 % maior)
+    const e = G({ height: 170, weight: 70, age: 60, sex: 'F', fc: 90, hb: 12, sao2: 97, svo2: 70 });
+    const asc = 0.007184 * Math.pow(70, 0.425) * Math.pow(170, 0.725);
+    const vo2m2 = 138.1 - 17.04 * Math.log(60) + 0.378 * 90;
+    expect(vo2m2).toBeCloseTo(102.35, 2);
+    expect(e.d.vo2est).toBeCloseTo(asc * vo2m2, 3);
+    expect(e.d.dcFick).toBeCloseTo((asc * vo2m2) / (1.34 * 12 * 0.27 * 10), 3);
+  });
+  it('FeUreia: 35 % ainda é pré-renal (Carvounis 2002, PMID 12427149: FeUr ≤ 35 %); FeNa 0,5 % pré-renal (Espinel 1976, PMID 947239)', () => {
+    // FeUr = (uUr × Cr) / (ureia × uCr) × 100 = (350 × 2) / (100 × 20) × 100 = 35
+    expect(gfind(G({ uUr: 350, cr: 2, ureia: 100, uCr: 20 }), 'feur').n).toBe('pré-renal provável');
+    expect(gfind(G({ uUr: 360, cr: 2, ureia: 100, uCr: 20 }), 'feur').n).toBe('renal provável');
+    // FeNa = (uNa × Cr) / (Na × uCr) × 100 = (10 × 2) / (140 × 28,57) × 100 = 0,5
+    expect(num(gfind(G({ uNa: 10, cr: 2, na: 140, uCr: 28.57 }), 'fena'))).toBeCloseTo(0.5, 2);
+    expect(gfind(G({ uNa: 10, cr: 2, na: 140, uCr: 28.57 }), 'fena').n).toBe('pré-renal provável');
+  });
   it('fluido-responsividade: VPP, PLR, EEO+EIO, tidal volume challenge', () => {
     expect(gfind(G({ ftest: 'vpp', ppv: 16, chkVc: true, chkSinus: true, chkTorax: true, vt: 600, height: 175, sex: 'M', fc: 100, fr: 18 }), 'fr_vpp').l).toBe('Responsivo');
     expect(gfind(G({ ftest: 'vpp', ppv: 16, chkVc: true, chkSinus: true, chkTorax: true, vt: 420, height: 175, sex: 'M' }), 'fr_vpp').n).toContain('tidal volume challenge');
@@ -248,5 +266,101 @@ describe('casos de borda', () => {
     expect(gasF.fluidLabel('ppv', { ftest: 'plr' })).toBeUndefined();
     expect(gasF.TREND.map((t) => t[0]).every((k) => k in G({}).key)).toBe(true);
     expect(engine.CHANNELS.map((c) => c.id)).toEqual(['ab', 'st', 'o2', 'perf', 'fluid', 'hemo', 'vent', 'renal']);
+  });
+});
+
+/* Auditoria clínica 2026-10, parte 1 (docs/auditoria-2026-10/1-gasometria-oxigenacao.md): limites conferidos número a número
+   contra a fonte primária localizada no PubMed. Valores esperados calculados à mão — não alterar sem nova fonte. */
+describe('auditoria 2026-10 — gasometria, ácido-base, oxigenação e SDRA', () => {
+  it('P/F exatamente 100 é SDRA grave (≤ 100, inclusivo) — Berlim, Ranieri JAMA 2012 PMID 22797452; Matthay AJRCCM 2024 PMID 37487152', () => {
+    const e = G({ pao2: 50, fio2: 50, sup: 'VM', peep: 8 });
+    expect(num(gfind(e, 'pf'))).toBeCloseTo(100, 6);
+    expect(gfind(e, 'pf').fl).toBe('crit');
+    expect(gfind(e, 'pf').n).toContain('grave');
+    expect(dxText(e)).toContain('SDRA grave');
+    expect(gfind(G({ pao2: 50.25, fio2: 50 }), 'pf').n).toContain('moderada'); // 100,5
+    expect(gfind(G({ pao2: 75, fio2: 25 }), 'pf').n).toContain('leve'); // 300
+    expect(gfind(G({ pao2: 75.25, fio2: 25 }), 'pf').fl).toBe('ok'); // 301
+  });
+  it('S/F (Rice, Chest 2007 PMID 17573487; Matthay 2024 PMID 37487152): ≤ 148 grave · ≤ 235 moderada · ≤ 315 leve · 316 sem critério', () => {
+    const sf = (spo2: number, fio2: number) => gfind(G({ spo2, fio2, sup: 'VM', peep: 8 }), 'sf');
+    expect(num(sf(74, 50))).toBeCloseTo(148, 6);
+    expect(sf(74, 50).fl).toBe('crit');
+    expect(sf(74, 50).n).toContain('grave');
+    expect(dxText(G({ spo2: 74, fio2: 50, sup: 'VM', peep: 8 }))).toContain('SDRA grave');
+    expect(sf(58.75, 25).n).toContain('moderada'); // 235
+    expect(num(sf(78.75, 25))).toBeCloseTo(315, 6);
+    expect(sf(78.75, 25).fl).toBe('warn');
+    expect(sf(78.75, 25).n).toContain('leve');
+    expect(sf(79, 25).fl).toBe('ok'); // 316
+  });
+  it('índice de oxigenação: IO 16 já é grave (PALICC-2, Emeriaud PCCM 2023 PMID 36661420: IO ≥ 16); 15,8 não; > 25 crit é decisão institucional', () => {
+    // IO = FiO2 × Paw × 100 / PaO2 = 0,8 × 20 × 100 / 100 = 16
+    const e = G({ paw: 20, fio2: 80, pao2: 100 });
+    expect(num(gfind(e, 'oi'))).toBeCloseTo(16, 6);
+    expect(gfind(e, 'oi').fl).toBe('warn');
+    expect(gfind(G({ paw: 20, fio2: 80, pao2: 101 }), 'oi').fl).toBe('ok');
+    expect(gfind(G({ paw: 20, fio2: 100, pao2: 75 }), 'oi').fl).toBe('crit'); // 26,7
+  });
+  it('Winter (Albert, Dell & Winters 1967, PMID 6016545; Berend 2014 tab. 1): HCO₃ 13 → 27,5 ± 2; PaCO₂ 30 fica fora da faixa', () => {
+    expect(num(gfind(G({ ph: 7.25, paco2: 28, hco3: 13 }), 'winter'))).toBeCloseTo(27.5, 6);
+    expect(gfind(G({ ph: 7.25, paco2: 28, hco3: 13 }), 'winter').fl).toBe('ok');
+    expect(gfind(G({ ph: 7.25, paco2: 30, hco3: 13 }), 'winter').fl).toBe('warn');
+  });
+  it('compensações respiratórias: acidose aguda 1/10 e crônica 4/10 (Berend NEJM 2014, PMID 25295502: 4–5; González/Adrogué/Madias 2018, PMID 30197983: 0,476/mmHg); alcalose 2/10 e 5/10 (Krapf 1991, PMID 1902283)', () => {
+    const ra = gfind(G({ ph: 7.32, paco2: 60, hco3: 31 }), 'racomp');
+    expect(num(ra)).toBeCloseTo(26, 6);
+    expect(ra.n).toContain('crônico 32,0'); /* 24 + 4 × 20/10 */
+    const rk = gfind(G({ ph: 7.62, paco2: 20, hco3: 20 }), 'ralkcomp');
+    expect(num(rk)).toBeCloseTo(20, 6);
+    expect(rk.n).toContain('crônico 14,0');
+  });
+  it('SBE (Van Slyke, Siggaard-Andersen 1977, PMID 13478, Hb 3,1 mmol/L): pH 7,30 / HCO₃ 18 → 0,9287 × (18 − 24,4 + 14,83 × (−0,10)) = −7,32', () => {
+    expect(G({ ph: 7.30, hco3: 18, paco2: 38 }).d.sbe).toBeCloseTo(-7.321, 2);
+  });
+  it('AG corrigido (Figge 1998, PMID 9824071: +2,5 por g/dL de albumina abaixo de 4,0): AG 20 com Alb 2,0 → 25', () => {
+    const e = G({ na: 140, cl: 100, hco3: 20, alb: 2.0 });
+    expect(e.d.ag).toBeCloseTo(20, 6);
+    expect(e.d.agc).toBeCloseTo(25, 6);
+  });
+  it('Stewart: SIDe (Figge 1992, PMID 1431499) e BE parcionado (Story 2004, PMID 14665553: Na − Cl − 38; 0,25 × (42 − Alb g/L))', () => {
+    const e = G({ ph: 7.40, hco3: 24, paco2: 40, na: 140, k: 4, cl: 100, alb: 4.2, phos: 3.1, lac: 1 });
+    // SIDe = 24 + 42 × (0,123 × 7,4 − 0,631) + 1,0 × (0,309 × 7,4 − 0,469) = 37,54
+    expect(e.d.side).toBeCloseTo(24 + 42 * (0.123 * 7.4 - 0.631) + (0.309 * 7.4 - 0.469), 6);
+    expect(e.d.bep?.naCl).toBeCloseTo(2, 6);
+    expect(e.d.bep?.alb).toBeCloseTo(0, 6);
+    expect(e.d.bep?.lac).toBeCloseTo(0, 6);
+  });
+  it('osmolaridade (Worthley 1987, PMID 3605570; Berend 2014, PMID 25295502): 2 × 140 + 90/18 + 30/6 = 290; gap 15 alerta, gap 10 não', () => {
+    const e = G({ na: 140, glic: 90, ureia: 30, osmMed: 305 });
+    expect(num(gfind(e, 'osm'))).toBeCloseTo(290, 6);
+    expect(num(gfind(e, 'osmgap'))).toBeCloseTo(15, 6);
+    expect(gfind(e, 'osmgap').fl).toBe('crit');
+    expect(gfind(G({ na: 140, glic: 90, ureia: 30, osmMed: 300 }), 'osmgap').fl).toBe('ok');
+  });
+  it('Na corrigido (Katz 1973, PMID 4763428: 1,6; Hillier 1999, PMID 10225241: 2,4): Na 130 / glicemia 500 → Hillier 139,6 · Katz 136,4', () => {
+    const nc = gfind(G({ na: 130, glic: 500 }), 'nacorr');
+    expect(num(nc)).toBeCloseTo(139.6, 6);
+    expect(nc.n).toContain('Hillier 140');
+    expect(nc.n).toContain('Katz 136');
+  });
+  it('déficit de água livre (Adrogué & Madias, NEJM 2000, PMID 10816188): homem 40 a, 70 kg, Na 160 → 42 × (160/140 − 1) = 6,0 L; mulher ≥ 65 a usa 0,45', () => {
+    expect(num(gfind(G({ na: 160, weight: 70, age: 40, sex: 'M' }), 'fwd'))).toBeCloseTo(6, 3);
+    expect(num(gfind(G({ na: 160, weight: 70, age: 70, sex: 'F' }), 'fwd'))).toBeCloseTo(70 * 0.45 * (160 / 140 - 1), 6);
+  });
+  it('ROX (Roca, AJRCCM 2019, PMID 30576221): 5 → menor risco; 4 → zona intermediária; 3 → alto risco (corte de 12 h, 3,85)', () => {
+    const rox = (spo2: number, fio2: number, fr: number) => gfind(G({ sup: 'CNAF', spo2, fio2, fr }), 'rox');
+    expect(num(rox(90, 60, 30))).toBeCloseTo(5, 6);
+    expect(rox(90, 60, 30).fl).toBe('ok');
+    expect(rox(90, 75, 30).fl).toBe('warn');
+    expect(rox(90, 100, 30).fl).toBe('crit');
+    expect(rox(90, 100, 30).n).toContain('alto risco');
+  });
+  it('SDRA não intubada (Matthay 2024): CNAF com P/F ≤ 300 aciona o critério não intubado', () => {
+    expect(dxText(G({ sup: 'CNAF', pao2: 60, fio2: 40 }))).toContain('não intubada');
+  });
+  it('REF: todo item auditado nesta parte tem PMID gravado na fonte', () => {
+    const ids = ['primary', 'winter', 'malk', 'racomp', 'ralkcomp', 'hh', 'ag', 'agc', 'dr', 'sbe', 'sida', 'side', 'sig', 'bepart', 'osm', 'osmgap', 'nacorr', 'fwd', 'pf', 'sf', 'aa', 'oi', 'ards', 'rox'];
+    expect(ids.filter((id) => !/PMID \d{5,8}/.test(engine.REF[id].s)).join(',') || 'ok').toBe('ok');
   });
 });

@@ -76,6 +76,15 @@ describe('ajuste renal — limites das faixas (grupo 10)', () => {
   it('Cefepime ClCr 60 → 2 g 12/12 h (bula: 30–60)', () => expect(D('Cefepime', 60)).toContain('2 g IV 12/12 h'));
   it('Cefepime ClCr 29,9 → 2 g 24/24 h', () => expect(D('Cefepime', 29.9)).toContain('2 g IV 24/24 h'));
   it('Cefepime ClCr 10,9 → 1 g 24/24 h', () => expect(D('Cefepime', 10.9)).toContain('1 g IV 24/24 h'));
+  it('Cefepime em hemodiálise: 1 g no 1º dia, depois 500 mg 24/24 h (bula Hospira 11/2024; neutropenia febril 1 g 24/24 h)', () => {
+    expect(D('Cefepime', 5)).toContain('1 g no 1º dia, depois 500 mg 24/24 h');
+    expect(D('Cefepime', 5)).toContain('neutropenia febril: 1 g 24/24 h');
+  });
+  it('Pip-tazo em DP: 2,25 g 8/8 h sem suplemento (bula Zosyn 5/2026); suplemento de 0,75 g só pós-HD', () => expect(D('Piperacilina-tazobactam', 10)).toContain('DP: 2,25 g IV 8/8 h, sem suplemento'));
+  it('SMX-TMP dose habitual IV pela bula: TMP 8–10 mg/kg/dia (PCP 15–20)', () => {
+    expect(NORMAL['SMX-TMP']).toContain('8–10 mg/kg/dia');
+    expect(NORMAL['SMX-TMP']).toContain('15–20 mg/kg/dia');
+  });
   it('Ceftazidima-avibactam ClCr 50,1 → 2,5 g', () => expect(D('Ceftazidima-avibactam', 50.1)).toContain('2,5 g IV 8/8 h'));
   it('Ceftazidima-avibactam ClCr 50 → 1,25 g 8/8 h (bula: 31–50)', () => expect(D('Ceftazidima-avibactam', 50)).toContain('1,25 g IV 8/8 h'));
   it('Ceftazidima-avibactam ClCr 30 → 0,94 g 12/12 h (bula: 16–30)', () => expect(D('Ceftazidima-avibactam', 30)).toContain('0,94 g IV 12/12 h'));

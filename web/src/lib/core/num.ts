@@ -73,7 +73,9 @@ export function rangeTag(v: number, lo: number, hi: number): RangeTag {
 /* FiO₂ digitada em % (21–100) ou fração (0,21–1) → fração; fora disso NaN */
 export const fio2 = (v: number): number => (!Number.isFinite(v) ? NaN : v <= 1 ? (v >= 0.21 ? v : NaN) : v >= 21 && v <= 100 ? v / 100 : NaN);
 
-/* PaO₂/FiO₂ — faixas de Berlim (ARDS Definition Task Force, JAMA 2012) */
+/* PaO₂/FiO₂ — faixas de Berlim: leve 200 < P/F ≤ 300 · moderada 100 < P/F ≤ 200 · grave ≤ 100
+   (ARDS Definition Task Force, Ranieri VM et al., JAMA 2012;307:2526; PMID 22797452; DOI 10.1001/jama.2012.5669;
+   mantidas na definição global 2024, Matthay MA et al., AJRCCM 2024;209:37; PMID 37487152) */
 export const berlin = (pf: number): [Cls, string] => (pf > 300 ? ['ok', 'Sem critério de SDRA (> 300)']
   : pf > 200 ? ['warn', 'Faixa de SDRA leve (201–300)']
   : pf > 100 ? ['crit', 'Faixa de SDRA moderada (101–200)']

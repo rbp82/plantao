@@ -1,6 +1,7 @@
 # PCR em adultos — base do módulo "PCR guiada (ACLS)"
 
-Fonte principal: **AHA 2025 Guidelines for CPR and ECC, Part 9 — Adult Advanced Life Support** (Circulation 2025;152(Suppl 2):S538–S577, DOI 10.1161/CIR.0000000000001376), lida em cpr.heart.org.
+Fonte principal: **AHA 2025 Guidelines for CPR and ECC, Part 9 — Adult Advanced Life Support** (Wigginton JG et al. Circulation 2025;152(16 Suppl 2):S538–S577, publicada em 22/10/2025, **PMID 41122884**, DOI 10.1161/CIR.0000000000001376), lida em cpr.heart.org.
+Publicações conferidas no PubMed em 11/10/2026: Part 7 BLS adulto (Kleinman ME et al., S448–S478, PMID 41122888, DOI 10.1161/CIR.0000000000001369) · Part 10 circunstâncias especiais (Cao D et al., S578–S672, PMID 41122889, DOI 10.1161/CIR.0000000000001380) · Part 11 pós-PCR (Hirsch KG et al., S673–S718, PMID 41122894, DOI 10.1161/CIR.0000000000001375) · diretriz anterior: Panchal AR et al. Part 3: Adult Basic and Advanced Life Support, 2020 (Circulation 2020;142(16 Suppl 2):S366–S468, PMID 33081529, DOI 10.1161/CIR.0000000000000916). Auditoria: docs/auditoria-2026-10/5-cad-sodio-teg-acls.md.
 Complementos: Partes 7 (BLS adulto), 10 (circunstâncias especiais) e 11 (pós-PCR), além do algoritmo em versão texto. Classe e nível de evidência entre parênteses.
 Pesquisa feita em 03/10/2026. Marcado **[2025]** o que mudou em relação a 2020.
 

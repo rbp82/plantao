@@ -1,6 +1,6 @@
 /* Oxigenação e transporte de O₂: P/F, extração, SvO₂, DO₂, VO₂. */
 import { useEffect, useState } from 'react';
-import { Grid, Note, NumField, Readout, Readouts, Section, Steps } from '@/components/ui';
+import { Grid, Note, NumField, Readout, Readouts, Ref, Section, Steps } from '@/components/ui';
 import { registerTool, type ToolProps } from '@/tools/registry';
 import { computeOxigenacao, type Out } from './oxigenacao.calc';
 import { val } from './shared';
@@ -49,6 +49,7 @@ function OxigenacaoTool({ api }: ToolProps) {
           ['', <><b>Meta Hb</b> {'>'} 7 g/dL; no choque com baixo DC ou isquemia, considerar 8–9.</>],
         ]} />
       </Section>
+      <Ref>Fontes: Berlim — ARDS Definition Task Force, JAMA 2012;307:2526 (PMID 22797452): leve 200 {'<'} P/F ≤ 300, moderada 100 {'<'} P/F ≤ 200, grave ≤ 100, com PEEP/CPAP ≥ 5. A definição global de 2023/2024 (Matthay MA et al. Am J Respir Crit Care Med 2024;209:37, PMID 37487152; ESICM 2023, Grasselli G et al., PMID 37326646) aceita SpO₂/FiO₂ ≤ 315 (SpO₂ ≤ 97%) e cateter nasal de alto fluxo ≥ 30 L/min — não implementada nesta ferramenta. ScvO₂ ≥ 70% como meta: Rivers E et al. NEJM 2001;345:1368 (PMID 11794169). Hb-alvo 7 g/dL (estratégia restritiva; exceções: isquemia miocárdica, hipoxemia grave, hemorragia aguda): SSC 2021 (PMID 34605781). DO₂ = DC × (1,34 × Hb × SaO₂ + 0,003 × PaO₂) × 10, SvO₂ 65–75% e extração 20–30%: fisiologia padrão, sem fonte primária única.</Ref>
     </div>
   );
 }

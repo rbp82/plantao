@@ -1,6 +1,6 @@
 /* ATB empírico por foco: pulmonar, urinário, abdominal, pele, SNC, endocardite, desconhecido. */
 import { useEffect, useRef, useState } from 'react';
-import { Note, Pill, Section } from '@/components/ui';
+import { Note, Pill, Ref, Section } from '@/components/ui';
 import { registerTool, type ToolProps } from '@/tools/registry';
 import { computeFoco, FOCO, TAG } from './atb-foco.calc';
 import { PickGrid } from './shared';
@@ -31,6 +31,7 @@ function AtbFocoTool({ api }: ToolProps) {
         )}
       </div>
       <Note cls="info">Reavaliar em 48–72 h com culturas e descalonar assim que possível (SSC). Ajustar à microbiologia local e à função renal (ver “Ajuste renal de ATB”).</Note>
+      <Ref>Fontes: PAC — Metlay JP et al. ATS/IDSA, Am J Respir Crit Care Med 2019;200:e45 (PMID 31573350); PAH/PAV — Kalil AC et al. IDSA/ATS, Clin Infect Dis 2016;63:e61 (PMID 27418577); ITU — Gupta K et al. IDSA/ESCMID, Clin Infect Dis 2011;52:e103 (PMID 21292654) e IDSA AMR Guidance 2026 (Tamma PD et al., PMID 42570093); abdome — Mazuski JE et al. SIS, Surg Infect 2017;18:1 (PMID 28085573); colangite — Tokyo Guidelines 2018 (Gomi H et al., PMID 29090866); candidemia — Pappas PG et al. IDSA, Clin Infect Dis 2016;62:e1 (PMID 26679628; equinocandina é a terapia inicial recomendada, fluconazol é alternativa em paciente não crítico); pele — Stevens DL et al. IDSA, Clin Infect Dis 2014;59:e10 (PMID 24973422); meningite — Tunkel AR et al. IDSA, Clin Infect Dis 2004;39:1267 (PMID 15494903) e 2017 (PMID 28203777); endocardite — Baddour LM et al. AHA, Circulation 2015;132:1435 (PMID 26373316). Os esquemas empíricos são decisão institucional (CCIH) e devem seguir o antibiograma local.</Ref>
     </div>
   );
 }

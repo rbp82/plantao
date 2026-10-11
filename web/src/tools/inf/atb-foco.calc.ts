@@ -27,7 +27,8 @@ export const FOCO: Record<string, [string, FocoRow[]]> = {
     ['Peritonite comunitária', 'Piperacilina-tazobactam 4,5 g IV 6/6 h', 'P'],
     ['Peritonite hospitalar / pós-op.', 'Meropenem 1 g IV 8/8 h', 'P'],
     ['Colangite', 'Ceftriaxona + metronidazol', 'P'],
-    ['Candidemia suspeita', 'Fluconazol ou equinocandina', 'X'],
+    /* IDSA 2016 (Pappas PG et al., Clin Infect Dis 2016;62:e1; PMID 26679628): equinocandina é a terapia inicial recomendada (forte, alta); fluconazol só em paciente não crítico, sem exposição recente a azol e com isolado provavelmente sensível */
+    ['Candidemia suspeita', 'Equinocandina (1ª escolha); fluconazol só se não crítico e sem azol recente', 'X'],
   ]],
   pele: ['Pele e partes moles', [
     ['Celulite grave / erisipela', 'Oxacilina 2 g IV 4/4 h', 'P'],

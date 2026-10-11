@@ -87,4 +87,4 @@ Ver [`web/CONVENTIONS.md`](web/CONVENTIONS.md): `src/tools/<grupo>/<id>.calc.ts`
 ## Testes e auditoria
 
 - `npm test` em `web/` (Vitest). Cada calculadora tem o seu `*.test.ts`; os módulos de `src/lib` carregam as asserções da bateria original (números pt-BR, infusões, função renal, gasometria e motor completo, cofre criptografado, leitos, PCR caixa a caixa, leitura do ticket) mais casos de borda.
-- Fórmulas, fontes e correções: [AUDITORIA.md](AUDITORIA.md). Base do motor de gasometria: [PESQUISA.md](PESQUISA.md); PCR: [PESQUISA-ACLS.md](PESQUISA-ACLS.md).
+- **Auditoria clínica 11/10/2026** (todas as fórmulas conferidas contra a fonte primária e o PubMed, com PMID/DOI em cada item e no rodapé de cada tela): [docs/auditoria-2026-10/0-resumo.md](docs/auditoria-2026-10/0-resumo.md). Auditoria original de 03/10/2026: [AUDITORIA.md](AUDITORIA.md). Base do motor de gasometria: [PESQUISA.md](PESQUISA.md); PCR: [PESQUISA-ACLS.md](PESQUISA-ACLS.md).

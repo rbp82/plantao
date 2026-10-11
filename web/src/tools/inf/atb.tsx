@@ -98,7 +98,7 @@ function AtbTool({ api }: ToolProps) {
           </Button>
         </div>
       )}
-      <Ref>Fontes: bulas FDA (DailyMed) de cada droga; teicoplanina: SPC Targocid (UK); gentamicina: nomograma de Hartford (Nicolau 1995); vancomicina: ASHP/IDSA 2020; colistina: consenso internacional 2019 (Tsuji). O consenso da colistina calcula o ClCr com peso ajustado. Drogas nefrotóxicas exigem controle laboratorial seriado; validar com a farmácia clínica.</Ref>
+      <Ref>Fontes: bulas FDA (DailyMed, setId e data de revisão anotados por droga no código, auditoria 10/2026); teicoplanina: SPC Targocid (UK, rev. 12/2025); gentamicina: nomograma de Hartford (Nicolau DP et al. AAC 1995;39:650, PMID 7793867; amicacina é extrapolação sem fonte primária); vancomicina: Rybak MJ et al. ASHP/IDSA/PIDS/SIDP 2020 (PMID 32191793); colistina e polimixina B: consenso internacional 2019 (Tsuji BT et al., PMID 30710469; polimixina B sem ajuste renal). O consenso da colistina calcula o ClCr com peso ajustado. Drogas nefrotóxicas exigem controle laboratorial seriado; validar com a farmácia clínica.</Ref>
     </div>
   );
 }

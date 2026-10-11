@@ -1,4 +1,5 @@
-/* Cetoacidose diabética — Kitabchi AE et al. Diabetes Care 2009;32:1335 (ADA) · UpToDate. Lógica em cad.calc.ts. */
+/* Cetoacidose diabética — Umpierrez GE et al., consenso ADA/EASD/JBDS/AACE/DTS, Diabetes Care 2024;47:1257 (PMID 39052901);
+   Kitabchi AE et al. Diabetes Care 2009;32:1335 (PMID 19564476) onde o consenso 2024 não traz número. Lógica em cad.calc.ts. */
 import { useEffect, useState } from 'react';
 import { ChoiceList, Grid, Note, NumField, Ref, Section, SegField, Steps, Verdict } from '@/components/ui';
 import { registerTool, type ToolProps } from '@/tools/registry';
@@ -57,7 +58,7 @@ function CadTool({ api, peso }: ToolProps) {
           <Block title="Monitorização" items={m.monitorizacao} />
         </>
       )}
-      <Ref>Kitabchi AE et al. Diabetes Care 2009;32:1335 (ADA) · UpToDate.</Ref>
+      <Ref>Umpierrez GE et al. Hyperglycemic Crises in Adults With Diabetes: A Consensus Report (ADA/EASD/JBDS/AACE/DTS). Diabetes Care 2024;47(8):1257–1275 — PMID 39052901 — doi:10.2337/dci24-0032 (critérios diagnósticos, gravidade, fluidos, insulina 0,1 U/kg/h, K⁺ 3,5/5,0, bicarbonato pH &lt; 7,0, resolução, transição). Itens marcados "ADA 2009": Kitabchi AE et al. Diabetes Care 2009;32(7):1335–1343 — PMID 19564476 — doi:10.2337/dc09-9032. Na⁺ corrigido: +1,6 mEq/L por 100 mg/dL de glicose acima de 100 (ambos).</Ref>
     </div>
   );
 }

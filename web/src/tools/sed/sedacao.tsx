@@ -30,7 +30,7 @@ function SedTool({ api, peso }: ToolProps) {
         {SED_BY_CAT[cat].map((d) => <InfusionCard key={d.id} d={d} mode={set.mode} peso={peso} input={set.inputs[d.id] || ''} onInput={(v) => set.setInput(d.id, v)} />)}
       </div>
       {NOTES[cat]}
-      <Ref>Faixas de sedativos e opioides: SCCM PAD 2013 (Barr J et al. Crit Care Med 2013;41:263). BNM: faixas usuais de bula — titular pelo TOF. Diluições editáveis — a alteração fica salva neste aparelho.</Ref>
+      <Ref>Faixas de sedativos e opioides: SCCM PAD 2013 — Barr J et al. Crit Care Med 2013;41:263–306 (PMID 23269131; DOI 10.1097/CCM.0b013e3182783b72), tabelas 3 e 6; conduta (analgesia primeiro, sedação leve, evitar benzodiazepínico): PADIS 2018 — Devlin JW et al. Crit Care Med 2018;46:e825–e873 (PMID 30113379). Propofol, midazolam e dexmedetomidina também conforme bula FDA/DailyMed (Diprivan, midazolam, Precedex); dexmedetomidina até 1,5 mcg/kg/h: Shehabi Y et al. N Engl J Med 2019;380:2506 (SPICE III, PMID 31112380) e Hughes CG et al. N Engl J Med 2021;384:1424 (MENDS2, PMID 33528922). PRIS: bula Diprivan (&gt; 5 mg/kg/h por &gt; 48 h; não exceder 4 mg/kg/h) e Krajčová A et al. Crit Care 2015;19:398 (PMID 26558513 — descrita também abaixo de 4 mg/kg/h). BNM: bulas (cisatracúrio 0,5–10,2 mcg/kg/min; rocurônio 4–16 mcg/kg/min; vecurônio 0,8–1,2 mcg/kg/min) e SCCM 2016 — Murray MJ et al. Crit Care Med 2016;44:2079 (PMID 27755068) — titular pelo TOF. Diluições editáveis — a alteração fica salva neste aparelho.</Ref>
     </>
   );
 }

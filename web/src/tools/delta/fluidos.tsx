@@ -1,9 +1,9 @@
 /* Fluido-responsividade — VPP, VVS, PLR, EEO, mini-bolus, VCI e tidal volume challenge (delta.js).
    Os campos mudam com o teste (C.gasF.fluidFields / fluidLabel); o veredito vem do canal 'fluid' do motor. */
 import { useEffect, useId, useState } from 'react';
-import { CheckGroup, CheckRow, Grid, Section, SegField, Verdict } from '@/components/ui';
+import { CheckGroup, CheckRow, Grid, Ref, Section, SegField, Verdict } from '@/components/ui';
 import { registerTool, type ToolProps } from '@/tools/registry';
-import { CHK, F, FL, G, HINT, REF, VAL, runFluid, type Inputs } from './delta.calc';
+import { CHK, F, FL, FLUID_FOOTER, G, HINT, REF, VAL, runFluid, type Inputs } from './delta.calc';
 import { Collapsible, EngineField, RefBlock, collectInputs, usePatientInputs, type FieldValue } from './SectionTool';
 
 /* escolha única em linhas de 3 (equivalente ao seg 'wrap3' do antigo) */
@@ -71,6 +71,7 @@ function FluidosTool({ api }: ToolProps) {
       )}
       <Verdict cls={m.cls} kicker={m.kicker} title={m.title} desc={m.desc || undefined} />
       {ref && <Collapsible title="Fórmulas, cortes e fontes"><RefBlock r={ref} title={false} /></Collapsible>}
+      <Ref>{FLUID_FOOTER}</Ref>
     </div>
   );
 }

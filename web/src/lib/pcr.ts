@@ -8,7 +8,14 @@ import { fmt } from './core/num';
 
 /* ---------------- regras: AHA 2025, Part 9 (Adult ALS), Figure 2 — ver PESQUISA-ACLS.md ----------------
    O guia segue as caixas do algoritmo oficial; nenhum intervalo foi inventado.
-   Cada orientação aponta para uma referência (REF) com o trecho literal da diretriz. */
+   Cada orientação aponta para uma referência (REF) com o trecho literal da diretriz.
+   Publicação (PubMed, conferida em 11/10/2026 — docs/auditoria-2026-10/5-cad-sodio-teg-acls.md):
+   · Wigginton JG et al. Part 9: Adult Advanced Life Support: 2025 AHA Guidelines for CPR and ECC. Circulation 2025;152(16 Suppl 2):S538–S577.
+     PMID 41122884 · doi:10.1161/CIR.0000000000001376 (22/10/2025)
+   · Kleinman ME et al. Part 7: Adult Basic Life Support. Circulation 2025;152(16 Suppl 2):S448–S478. PMID 41122888 · doi:10.1161/CIR.0000000000001369
+   · Cao D et al. Part 10: Adult and Pediatric Special Circumstances of Resuscitation. Circulation 2025;152(16 Suppl 2):S578–S672. PMID 41122889 · doi:10.1161/CIR.0000000000001380
+   · Hirsch KG et al. Part 11: Post-Cardiac Arrest Care. Circulation 2025;152(16 Suppl 2):S673–S718. PMID 41122894 · doi:10.1161/CIR.0000000000001375
+   · Panchal AR et al. Part 3: Adult Basic and Advanced Life Support: 2020 AHA Guidelines. Circulation 2020;142(16 Suppl 2):S366–S468. PMID 33081529 · doi:10.1161/CIR.0000000000000916 */
 export const PROTO = {
   cicloMs: 120000,              // "CPR 2 minutes" entre checagens de ritmo
   epiMinMs: 3 * 60000,          // "Epinephrine … 1 milligram every 3 to 5 minutes"
@@ -27,6 +34,16 @@ export const U = {
   POST: 'https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/post-cardiac-arrest-care',
   SPEC: 'https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/adult-and-pediatric-special-circumstances-of-resuscitation',
 } as const;
+
+/* publicações das diretrizes citadas em REF (PubMed, 11/10/2026) — REF.u continua apontando para o texto em cpr.heart.org */
+export interface PcrCitation { t: string; j: string; pmid: string; doi: string }
+export const CITATIONS: Record<'part9' | 'part7' | 'part10' | 'part11' | 'aha2020', PcrCitation> = {
+  part9: { t: 'Wigginton JG et al. Part 9: Adult Advanced Life Support: 2025 AHA Guidelines for CPR and ECC', j: 'Circulation 2025;152(16 Suppl 2):S538–S577', pmid: '41122884', doi: '10.1161/CIR.0000000000001376' },
+  part7: { t: 'Kleinman ME et al. Part 7: Adult Basic Life Support: 2025 AHA Guidelines for CPR and ECC', j: 'Circulation 2025;152(16 Suppl 2):S448–S478', pmid: '41122888', doi: '10.1161/CIR.0000000000001369' },
+  part10: { t: 'Cao D et al. Part 10: Adult and Pediatric Special Circumstances of Resuscitation: 2025 AHA Guidelines for CPR and ECC', j: 'Circulation 2025;152(16 Suppl 2):S578–S672', pmid: '41122889', doi: '10.1161/CIR.0000000000001380' },
+  part11: { t: 'Hirsch KG et al. Part 11: Post-Cardiac Arrest Care: 2025 AHA Guidelines for CPR and ECC', j: 'Circulation 2025;152(16 Suppl 2):S673–S718', pmid: '41122894', doi: '10.1161/CIR.0000000000001375' },
+  aha2020: { t: 'Panchal AR et al. Part 3: Adult Basic and Advanced Life Support: 2020 AHA Guidelines for CPR and ECC', j: 'Circulation 2020;142(16 Suppl 2):S366–S468', pmid: '33081529', doi: '10.1161/CIR.0000000000000916' },
+};
 
 /* referência: t = título; q = trecho literal (inglês); c = classe/nível; u = fonte; n = nota do app */
 export interface PcrRef { t: string; q: string; c?: string; u: string; n?: string }
@@ -267,7 +284,7 @@ export function report(c: PcrInput): Report {
   L.push(`Desfecho: ${outcomeTxt(c)}${c.outcome === 'rce' && rce.length ? ` — RCE em ${at(rce[rce.length - 1].t)}` : ''}${c.outcome === 'obito' ? ` — óbito às ${hms(end)}` : ''}${s.rearrests ? ` · ${s.rearrests} nova(s) parada(s) após RCE` : ''}`);
   const notes = ofType('nota');
   if (notes.length) L.push(`Anotações: ${notes.map((e) => `[${mmss(e.t - c.start)}] ${e.label}`).join(' ')}`);
-  L.push('Conduta guiada pelo algoritmo de PCR em adultos — AHA 2025 (Part 9, Adult Advanced Life Support).');
+  L.push(`Conduta guiada pelo algoritmo de PCR em adultos — AHA 2025 (Part 9, Adult Advanced Life Support; ${CITATIONS.part9.j}; PMID ${CITATIONS.part9.pmid}; doi:${CITATIONS.part9.doi}).`);
   L.push('');
   L.push('Linha do tempo (min:s desde o início · horário):');
   c.events.forEach((e) => L.push(`${mmss(e.t - c.start)} · ${hms(e.t)} — ${e.label}`));

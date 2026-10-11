@@ -72,6 +72,8 @@ export interface ToolDef {
   preset?: Inputs;
   /* id de resultado → chave em REF (quando difere) */
   ref: Record<string, string>;
+  /* rodapé de referências (<Ref>) da tela — citações curtas com PMID (auditoria 2026-10) */
+  footer?: string;
 }
 export interface SectionOut {
   got: OutItem[];
@@ -110,7 +112,20 @@ export function runSection(def: ToolDef, inputs: Inputs): SectionModel {
   return { sections, dx, txt };
 }
 
-/* ---------- definições das ferramentas (idênticas ao delta.js) ---------- */
+/* ---------- definições das ferramentas (idênticas ao delta.js) ----------
+   Fórmulas e cortes vivem no motor (engine.ts, objeto REF); aqui só a composição das telas.
+   Auditoria clínica 2026-10 (docs/auditoria-2026-10/2-hemodinamica-ventilacao-renal.md), fontes primárias:
+   gap ≥ 6 mmHg — Ospina-Tascón GA, Crit Care 2013;17:R294, PMID 24330804; Vallée F, ICM 2008;34:2218, PMID 18607565;
+   razão ΔPCO₂/Ca−vO₂ > 1,4 — Mekontso-Dessap A, ICM 2002;28:272, PMID 11904655;
+   ScvO₂ ≥ 70 % — Rivers E, NEJM 2001;345:1368, PMID 11794169; lactato > 2 — Singer M (Sepsis-3), JAMA 2016;315:801, PMID 26903338;
+   DC por VTI — fórmula clássica (Blanco P, Ultrasound J 2020;12:21, PMID 32318842); ASC — Du Bois 1916 (PMID 2520314);
+   Fick estimado (LaFarge CG & Miettinen OS, Cardiovasc Res 1970;4:23, PMID 5416840; erro 25–45 %: Reiter T, Herz 2023, PMID 37439804;
+   Palanques-Tost E, JACC Adv 2025, PMID 40286350); CPO = PAM × DC / 451 — Fincke R, JACC 2004;44:340, PMID 15261929;
+   RVP > 2 UW — Humbert M (ESC/ERS 2022), Eur Heart J 2022;43:3618, PMID 36017548;
+   PBW — ARDS Network, NEJM 2000;342:1301, PMID 10793162; ΔP < 15 — Amato MBP, NEJM 2015;372:747, PMID 25693014;
+   VR — Sinha P, BJA 2009;102:692, PMID 19346233 e AJRCCM 2019;199:333, PMID 30211618;
+   MP — Gattinoni L, ICM 2016;42:1567, PMID 27620287; > 17 J/min — Serpa Neto A, ICM 2018;44:1914, PMID 30291378;
+   ROX — Roca O, AJRCCM 2019;199:1368, PMID 30576221. */
 export const GAP_CO2: ToolDef = {
   id: 'gap-co2', title: 'Perfusão tecidual', dx: ['perf'],
   intro: 'Amostras arterial e venosa central colhidas juntas.',
@@ -120,6 +135,7 @@ export const GAP_CO2: ToolDef = {
     { t: 'Lactato', f: ['lac'], o: ['lac'], opt: true },
   ],
   ref: {},
+  footer: 'Ospina-Tascón GA et al., Crit Care 2013;17:R294 (PMID 24330804) · Vallée F et al., Intensive Care Med 2008;34:2218 (PMID 18607565) · Mekontso-Dessap A et al., Intensive Care Med 2002;28:272 (PMID 11904655) · Rivers E et al., NEJM 2001;345:1368 (PMID 11794169) · Singer M et al., Sepsis-3, JAMA 2016;315:801 (PMID 26903338) · ESICM 2025, Intensive Care Med 2025;51:1971 (PMID 41236566). Cortes de populações específicas; não substituem o julgamento clínico.',
 };
 
 export const DEBITO: ToolDef = {
@@ -131,6 +147,7 @@ export const DEBITO: ToolDef = {
     { t: 'Resistências e potência', f: ['dcMed', 'pam', 'pvc', 'papm', 'poap'], o: ['rvs', 'rvp', 'cpo'], opt: true },
   ],
   ref: {},
+  footer: 'DC por VTI: fórmula clássica (Blanco P, Ultrasound J 2020;12:21, PMID 32318842) · ASC: Du Bois 1916 (PMID 2520314) · Fick estimado: LaFarge CG & Miettinen OS, Cardiovasc Res 1970;4:23 (PMID 5416840); erro de 25–45 % vs termodiluição — Reiter T et al., Herz 2023;49:50 (PMID 37439804), Palanques-Tost E et al., JACC Adv 2025;4:101663 (PMID 40286350) · CPO: Fincke R et al., JACC 2004;44:340 (PMID 15261929) · RVP > 2 UW: ESC/ERS 2022, Eur Heart J 2022;43:3618 (PMID 36017548). DO₂/VO₂/RVS: fórmulas clássicas de fisiologia.',
 };
 
 export const VENTILACAO: ToolDef = {
@@ -144,10 +161,21 @@ export const VENTILACAO: ToolDef = {
   ],
   preset: { sup: 'CNAF' },
   ref: {},
+  footer: 'Peso predito e Vt 6 mL/kg: ARDS Network, NEJM 2000;342:1301 (PMID 10793162) · Driving pressure < 15: Amato MBP et al., NEJM 2015;372:747 (PMID 25693014) · Ventilatory ratio: Sinha P et al., Br J Anaesth 2009;102:692 (PMID 19346233) e Am J Respir Crit Care Med 2019;199:333 (PMID 30211618) · Mechanical power: Gattinoni L et al., Intensive Care Med 2016;42:1567 (PMID 27620287); > 17 J/min: Serpa Neto A et al., Intensive Care Med 2018;44:1914 (PMID 30291378) · ROX: Roca O et al., Am J Respir Crit Care Med 2019;199:1368 (PMID 30576221). Complacência e resistência: fórmulas clássicas.',
 };
 
-/* ---------- fluido-responsividade ---------- */
-export const FL = ['ppv', 'ppMax', 'ppMin', 'svv', 'fBase', 'fPost', 'fEio', 'vciMax', 'vciMin', 'ppv6', 'ppv8'] as const;
+/* ---------- fluido-responsividade ----------
+   Cortes no motor (engine.ts fluid/REF). Fontes primárias (auditoria 2026-10): VPP 13 % — Michard F, AJRCCM 2000;162:134, PMID 10903232;
+   zona cinzenta 9–13 % — Cannesson M, Anesthesiology 2011;115:231, PMID 21705869; FC/FR > 3,6 — De Backer D, Anesthesiology 2009;110:1092,
+   PMID 19352152; Cst ≤ 30 — Monnet X, CCM 2012;40:152, PMID 21926581; VVS ~11,6 % — Marik PE, CCM 2009;37:2642, PMID 19602972;
+   PLR ≥ 10 % — Monnet X, ICM 2016;42:1935, PMID 26825952; PLR > 32 % hipovolemia — Joseph A (HEMOPRED), ICM 2024;50:1850, PMID 39254736;
+   EEO ≥ 5 % — Monnet X, CCM 2009;37:951, PMID 19237902; EEO+EIO ≥ 13 % — Jozwiak M, CCM 2017;45:e1131, PMID 28857907;
+   mini-bolus VTI ≥ 10 % — Muller L, Anesthesiology 2011;115:541, PMID 21792056; VCI distensibilidade > 18 % — Barbier C, ICM 2004;30:1740,
+   PMID 15034650; colapsabilidade > 40 % — Muller L, Crit Care 2012;16:R188, PMID 23043910; VtC ΔVPP ≥ 3,5 — Myatra SN, CCM 2017;45:415,
+   PMID 27922879; revisões — Monnet X, Shi R, Teboul JL, Ann Intensive Care 2022;12:46, PMID 35633423; Alvarado Sánchez JI, Ann Intensive Care
+   2021;11:28, PMID 33555488; ESICM 2025, ICM 2025;51:1971, PMID 41236566. */
+export const FLUID_FOOTER = 'VPP: Michard F et al., AJRCCM 2000;162:134 (PMID 10903232); zona cinzenta 9–13 %: Cannesson M et al., Anesthesiology 2011;115:231 (PMID 21705869); FC/FR > 3,6: De Backer D et al., Anesthesiology 2009;110:1092 (PMID 19352152) · VVS: Marik PE et al., Crit Care Med 2009;37:2642 (PMID 19602972) · PLR ≥ 10 %: Monnet X et al., Intensive Care Med 2016;42:1935 (PMID 26825952) · EEO ≥ 5 %: Monnet X et al., Crit Care Med 2009;37:951 (PMID 19237902); EEO + EIO ≥ 13 %: Jozwiak M et al., Crit Care Med 2017;45:e1131 (PMID 28857907) · Mini-bolus: Muller L et al., Anesthesiology 2011;115:541 (PMID 21792056) · VCI: Barbier C et al., Intensive Care Med 2004;30:1740 (PMID 15034650); espontânea: Muller L et al., Crit Care 2012;16:R188 (PMID 23043910) · Tidal volume challenge: Myatra SN et al., Crit Care Med 2017;45:415 (PMID 27922879) · Revisões: Monnet, Shi & Teboul, Ann Intensive Care 2022;12:46 (PMID 35633423); Alvarado Sánchez et al., Ann Intensive Care 2021;11:28 (PMID 33555488); ESICM 2025 (PMID 41236566).';
+export const FL =['ppv', 'ppMax', 'ppMin', 'svv', 'fBase', 'fPost', 'fEio', 'vciMax', 'vciMin', 'ppv6', 'ppv8'] as const;
 export const CHK = ['chkVc', 'chkSinus', 'chkTorax', 'chkVt8'] as const;
 export const VAL = ['vt', 'fc', 'fr'] as const;
 export const HINT: Record<string, string> = {

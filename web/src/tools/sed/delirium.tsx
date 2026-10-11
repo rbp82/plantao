@@ -1,6 +1,6 @@
 /* Antipsicóticos no delirium — referência estática (haloperidol e quetiapina). */
 import { useEffect } from 'react';
-import { KV, Note, Section } from '@/components/ui';
+import { KV, Note, Ref, Section } from '@/components/ui';
 import { registerTool, type ToolProps } from '@/tools/registry';
 
 const Small = ({ children }: { children: React.ReactNode }) => <small className="block font-normal text-muted">{children}</small>;
@@ -29,6 +29,7 @@ function DeliriumTool({ api }: ToolProps) {
       </Section>
       <Note cls="warn"><b>SCCM PADIS 2018:</b> evidência insuficiente para uso rotineiro de antipsicóticos na prevenção ou tratamento do delirium. Priorizar medidas não farmacológicas (reorientação, mobilização precoce, ciclo sono-vigília, menos benzodiazepínico).</Note>
       <Note cls="info"><b>Delirium hipoativo</b> não se trata com sedativo: investigar dor, retenção urinária, constipação, privação de sono, abstinência.</Note>
+      <Ref>Antipsicóticos sem recomendação de rotina e prioridade às medidas não farmacológicas: Devlin JW et al. SCCM PADIS 2018. Crit Care Med 2018;46:e825–e873 (PMID 30113379; DOI 10.1097/CCM.0000000000003299). Ensaios sem benefício do haloperidol (máximo de 20 mg/dia nos protocolos): Girard TD et al. MIND-USA. N Engl J Med 2018;379:2506–16 (PMID 30346242); Andersen-Ranberg NC et al. AID-ICU (2,5 mg IV 3×/dia + resgate, máx. 20 mg/dia). N Engl J Med 2022;387:2425–35 (PMID 36286254). Infusão de haloperidol 3–25 mg/h: série de 8 casos — Riker RR et al. Crit Care Med 1994;22:433–40 (PMID 8124994). Quetiapina 50 mg 12/12 h titulada até 200 mg 12/12 h: Devlin JW et al. Crit Care Med 2010;38:419–27 (PMID 19915454). Diagnóstico: CAM-ICU — Ely EW et al. JAMA 2001;286:2703–10 (PMID 11730446).</Ref>
     </>
   );
 }

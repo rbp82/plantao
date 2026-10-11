@@ -1,5 +1,7 @@
 # Auditoria de fórmulas e algoritmos — Plantão
 
+> **Auditoria clínica de 11/10/2026 (mais recente):** revisão de todas as fórmulas, limiares e doses contra a fonte primária e o PubMed, com referência (autores, periódico, ano, PMID/DOI) em cada item e correções aplicadas. Resumo e lista de correções em [`docs/auditoria-2026-10/0-resumo.md`](docs/auditoria-2026-10/0-resumo.md); relatórios por domínio na mesma pasta. O documento abaixo é a auditoria original de 03/10/2026 e permanece como histórico.
+
 Data: 03/10/2026 · Escopo: as 18 ferramentas do app, comparadas linha a linha com os 9 arquivos originais (`calculadoras.zip`) e com a fonte primária que cada calculadora cita (bula FDA/SPC, diretriz ou artigo original).
 
 **Verificação automática:** `tests/index.html`, 175 testes, todos passando. Os testes rodam o código real do app, e os valores esperados foram calculados à mão a partir das fórmulas publicadas. Para rodar de novo depois de qualquer alteração, abra `tests/index.html` servido por HTTP.

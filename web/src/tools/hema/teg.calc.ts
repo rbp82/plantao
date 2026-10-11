@@ -1,5 +1,10 @@
 /* Tromboelastograma (TEG) — lógica pura (portada de assets/js/tools/hema.js).
-   Referências para ativação por caolim; LY30 > 3% como limiar de hiperfibrinólise (Chapman 2013). */
+   Faixas de referência para TEG citratado com caolim (fabricante, TEG 5000 — não acessadas diretamente; valores do app mantidos como
+   decisão institucional; cf. Scarpelini 2009, PMID 19882085, 95 % em voluntários: R 3,8–9,8 · K 0,7–3,4 · α 47,8–77,7 · MA 49,7–72,7 · LY30 até 5,8).
+   LY30 ≥ 3 % = hiperfibrinólise clinicamente relevante no trauma (Chapman MP et al. J Trauma Acute Care Surg 2013;75:961, PMID 24256667;
+   o fabricante usa 0–7,4 %, limite 7,5 %). Condutas: TXA 1 g/10 min + 1 g/8 h (CRASH-2, Lancet 2010, PMID 20554319; Rossaint 2023 Rec. 23, 1A) ·
+   fibrinogênio 3–4 g ≈ 15–20 U de crio se ≤ 1,5 g/L ou déficit funcional viscoelástico (Rossaint R et al. Crit Care 2023;27:80, PMID 36859355, Rec. 29) ·
+   plaquetas > 50 × 10⁹/L (> 100 no TCE), 4–8 U ou 1 aférese (Rossaint 2023, Rec. 30). Auditoria: docs/auditoria-2026-10/5-cad-sodio-teg-acls.md. */
 import { C, type Cls } from '@/lib/calc';
 
 export type Key = 'R' | 'K' | 'A' | 'MA' | 'LY';
@@ -23,6 +28,8 @@ export const PRESETS: { name: string; v: TegValues }[] = [
   { name: 'Hipercoagulável', v: { R: 3.5, K: 1, A: 74, MA: 78, LY: 0.5 } },
 ];
 export const DEFAULTS: TegValues = { R: 6, K: 2, A: 63, MA: 60, LY: 1 };
+/* limiar de hiperfibrinólise no trauma: LY30 ≥ 3 % (Chapman 2013, PMID 24256667) */
+export const LY30_HIPER = 3;
 
 export const status = (v: number, [lo, hi]: [number, number]): Status => (v < lo ? 'low' : v > hi ? 'high' : 'normal');
 export const dev = (v: number, lo: number, hi: number) => (v < lo ? (lo - v) / (hi - lo) : v > hi ? (v - hi) / (hi - lo) : 0);
@@ -53,7 +60,8 @@ export interface TegModel {
 }
 
 export function computeTeg(v: TegValues): TegModel {
-  const s: Record<Key, Status> = { R: status(v.R, [5, 10]), K: status(v.K, [1, 3]), A: status(v.A, [53, 72]), MA: status(v.MA, [50, 70]), LY: v.LY > 3 ? 'high' : 'normal' };
+  /* LY30 ≥ 3 % (Chapman 2013: "LY30 of 3% or greater defines clinically relevant hyperfibrinolysis") */
+  const s: Record<Key, Status> = { R: status(v.R, [5, 10]), K: status(v.K, [1, 3]), A: status(v.A, [53, 72]), MA: status(v.MA, [50, 70]), LY: v.LY >= LY30_HIPER ? 'high' : 'normal' };
   const ab: string[] = [];
   if (s.R === 'high') ab.push('déficit de fatores');
   if (s.A === 'low' || s.K === 'high') ab.push('hipofibrinogenemia');
@@ -67,10 +75,12 @@ export function computeTeg(v: TegValues): TegModel {
       : { cls: 'ok', kicker: 'Padrão global', title: 'Dentro da normalidade', desc: 'Todos os parâmetros nas faixas de referência.' };
 
   const cand: Cand[] = [];
-  if (v.LY > 3) cand.push({ u: dev(v.LY, 0, 3) * 1.4 + 1, t: 'Ácido tranexâmico', d: 'LY30 elevado = hiperfibrinólise. Com sangramento ativo/trauma é prioridade: os hemocomponentes são degradados enquanto ela persiste.', dose: 'TXA 1 g IV em 10 min → 1 g IV em 8 h' });
+  if (v.LY >= LY30_HIPER) cand.push({ u: dev(v.LY, 0, 3) * 1.4 + 1, t: 'Ácido tranexâmico', d: 'LY30 ≥ 3% = hiperfibrinólise (Chapman 2013). Com sangramento ativo/trauma é prioridade e não deve esperar o resultado do TEG (até 3 h da lesão): os hemocomponentes são degradados enquanto ela persiste.', dose: 'TXA 1 g IV em 10 min → 1 g IV em 8 h' });
   else if (v.LY < 0.5) cand.push({ u: 0.3, t: 'Fibrinólise “shutdown” — não tratar empiricamente', d: 'LY30 muito baixo (trauma grave, sepse) não indica antifibrinolítico. Monitorar risco trombótico.' });
-  if (s.A === 'low' || s.K === 'high') cand.push({ u: Math.max(dev(v.A, 53, 72), dev(v.K, 1, 3)), t: 'Repor fibrinogênio', d: `${s.A === 'low' ? 'Ângulo α reduzido' : 'K prolongado'}${s.A === 'low' && s.K === 'high' ? ' e K prolongado' : ''} sugere hipofibrinogenemia funcional. Corrigir antes ou junto das plaquetas.`, dose: 'Crioprecipitado ~1 U/10 kg ou concentrado de fibrinogênio 3–4 g · meta > 150–200 mg/dL' });
-  if (s.MA === 'low') cand.push({ u: dev(v.MA, 50, 70) + 0.15, t: 'Transfundir plaquetas', d: 'MA reduzida reflete sobretudo disfunção/deficiência plaquetária (~80% da força do coágulo). Checar antiagregantes.', dose: '1 aférese ou 4–6 U randômicas · meta > 50.000 (> 100.000 em SNC)' });
+  /* fibrinogênio: Rossaint 2023 (Rec. 29) — repor se ≤ 1,5 g/L ou sinal viscoelástico de déficit funcional; dose inicial 3–4 g = 15–20 U de crioprecipitado */
+  if (s.A === 'low' || s.K === 'high') cand.push({ u: Math.max(dev(v.A, 53, 72), dev(v.K, 1, 3)), t: 'Repor fibrinogênio', d: `${s.A === 'low' ? 'Ângulo α reduzido' : 'K prolongado'}${s.A === 'low' && s.K === 'high' ? ' e K prolongado' : ''} sugere hipofibrinogenemia funcional. Corrigir antes ou junto das plaquetas.`, dose: 'Concentrado de fibrinogênio 3–4 g ou crioprecipitado 15–20 U (dose inicial) · repor se fibrinogênio ≤ 1,5 g/L (150 mg/dL) ou déficit funcional no TEG' });
+  /* plaquetas: Rossaint 2023 (Rec. 30) — manter > 50 × 10⁹/L com sangramento, > 100 × 10⁹/L no TCE; dose inicial 4–8 U ou 1 aférese */
+  if (s.MA === 'low') cand.push({ u: dev(v.MA, 50, 70) + 0.15, t: 'Transfundir plaquetas', d: 'MA reduzida reflete sobretudo disfunção/deficiência plaquetária (~80% da força do coágulo). Checar antiagregantes.', dose: '1 aférese ou 4–8 U randômicas · manter > 50.000/µL (> 100.000 no TCE)' });
   if (s.R === 'high') cand.push({ u: dev(v.R, 5, 10), t: 'Plasma fresco congelado', d: 'R prolongado = déficit de fatores. Excluir heparina residual (TEG com heparinase, sobretudo pós-CEC).', dose: 'PFC 10–15 mL/kg · CCP se reversão de anticoagulante' });
   if (hyper) cand.push({ u: Math.max(dev(v.R, 5, 10), dev(v.A, 53, 72), dev(v.MA, 50, 70)) * 0.6, t: 'Sem indicação de hemocomponente', d: 'Padrão pró-coagulante. Considerar profilaxia de TEV conforme o contexto.' });
   cand.sort((a, b) => b.u - a.u);

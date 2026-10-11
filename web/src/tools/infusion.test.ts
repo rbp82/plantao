@@ -42,9 +42,17 @@ describe('motor de infusões — dose = conc × vazão ÷ 60 ÷ peso', () => {
     const r = computeInfusion(by('nor'), 'dose', 10, conc(by('nor')), NaN);
     expect('missing' in r && r.missing).toBe('peso');
   });
-  it('nora > 1 mcg/kg/min gera alerta de vasopressina', () => {
+  it('nora: < 0,25 sem alerta; 0,25 → info SSC 2021 (vasopressina); > 1 → info + warn de alta dose', () => {
+    /* SSC 2021 (Evans, Crit Care Med 2021;49:e1063, PMID 34605781): vasopressina quando nora 0,25–0,5 mcg/kg/min */
+    expect(run(by('nor'), 'rate', 0.2).alerts.length).toBe(0);
+    const r25 = run(by('nor'), 'rate', 0.25);
+    expect(r25.alerts.length).toBe(1);
+    expect(r25.alerts[0][0]).toBe('info');
+    expect(r25.alerts[0][1]).toContain('vasopressina');
     const r = run(by('nor'), 'rate', 1.5);
-    expect(r.alerts.length).toBe(1);
+    expect(r.alerts.length).toBe(2);
+    expect(r.alerts.map(([c]) => c)).toEqual(['info', 'warn']);
+    expect(run(by('nor'), 'rate', 1).alerts.length).toBe(1);
   });
   it('leitura pt-BR: "1.000" = 1000, "7.25" = 7,25, "1,2,3" inválido', () => {
     expect(C.num('1.000')).toBe(1000);

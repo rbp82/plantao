@@ -1,6 +1,6 @@
 /* Triagem de sepse: qSOFA, SIRS + disfunção (ILAS), choque séptico (Sepsis-3). */
 import { useEffect, useState } from 'react';
-import { CheckGroup, CheckRow, Grid, Lbl, Note, NumField, Section, Verdict } from '@/components/ui';
+import { CheckGroup, CheckRow, Grid, Lbl, Note, NumField, Ref, Section, Verdict } from '@/components/ui';
 import { registerTool, type ToolProps } from '@/tools/registry';
 import { computeSepse, DISF, QSOFA, SIRS, type SepseNote } from './sepse.calc';
 import { val } from './shared';
@@ -48,6 +48,7 @@ function SepseTool({ api }: ToolProps) {
         <div className="mt-3"><CheckGroup><CheckRow checked={vp} onChange={setVp} label="Precisa de vasopressor para PAM ≥ 65" /></CheckGroup></div>
         <NoteB n={m.choque} />
       </Section>
+      <Ref>Fontes: Singer M et al. Sepsis-3, JAMA 2016;315:801 (PMID 26903338) — qSOFA (FR ≥ 22, Glasgow {'<'} 15, PAS ≤ 100) e choque séptico (vasopressor para PAM ≥ 65 + lactato {'>'} 2 mmol/L após volume). SIRS (temperatura axilar {'>'} 37,8 ou {'<'} 35 °C) e lista de disfunções orgânicas: ILAS, Ficha de triagem do protocolo gerenciado de sepse (jul/2021) e Protocolo clínico adulto (rev. ago/2018; critérios de Bone RC et al. Chest 1992;101:1644, PMID 1303622). Lactato ≥ 4 → 30 mL/kg: SSC Hour-1 bundle (Levy MM et al. Intensive Care Med 2018;44:925, PMID 29675566). A SSC 2021 (Evans L et al. Crit Care Med 2021;49:e1063, PMID 34605781) recomenda não usar o qSOFA isoladamente como triagem: qSOFA baixo não exclui sepse.</Ref>
     </div>
   );
 }

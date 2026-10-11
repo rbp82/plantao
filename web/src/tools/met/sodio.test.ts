@@ -66,6 +66,18 @@ describe('Sódio — modelo e bordas', () => {
     expect(txt({ vol: 'eu' })).toContain('Restrição hídrica: 500–800 mL/dia');
     expect(txt({ vol: 'hiper' })).toContain('Furosemida');
   });
+  it('SIADH refratário (diretriz europeia 2014): ureia ou alça + NaCl; demeclociclina e lítio não recomendados', () => {
+    const t = txt({ vol: 'eu' });
+    expect(t).toContain('ureia VO 0,25–0,5 g/kg/dia');
+    expect(t).toContain('Lítio e demeclociclina: não recomendados');
+    expect(t).not.toContain('tolvaptana ou demeclociclina');
+  });
+  it('limiares da diretriz europeia 2014 e Verbalis 2013 no texto: bolus 150 mL em 20 min até 3×, +5 mEq/L, limite 10–12 (8 se alto risco)', () => {
+    const t = txt({ sint: 'grave' });
+    expect(t).toContain('Bolus 150 mL IV em 20 min');
+    expect(t).toContain('alta de 5 mEq/L');
+    expect(t).toContain('máx. 10–12; 8 se alto risco de desmielinização');
+  });
   it('hipernatremia 162 crônica: déficit 6,6 L, meta 152 (−10), SG 5% 2,76 L (115 mL/h), SF 0,45% 5,6 L (233 mL/h)', () => {
     const m = run({ na: 162 });
     expect(m.kind).toBe('hiper');
